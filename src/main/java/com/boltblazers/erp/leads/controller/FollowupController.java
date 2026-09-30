@@ -39,4 +39,9 @@ public class FollowupController {
     public ResponseEntity<?> getUpcoming(@RequestParam(defaultValue = "7") int days) {
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/followups/{id}/acknowledge")
+    public ResponseEntity<?> acknowledge(@PathVariable Long id) {
+        return ResponseEntity.ok().build();
+    }
 }

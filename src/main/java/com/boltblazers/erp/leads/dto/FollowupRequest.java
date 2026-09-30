@@ -8,4 +8,5 @@ import java.time.Instant;
 public class FollowupRequest {
     @NotNull private Instant dueAt;
     private String note;
+    private Integer recurrenceDays;
 }

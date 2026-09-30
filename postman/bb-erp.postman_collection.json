@@ -376,6 +376,251 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Reports",
+            "item": [
+                {
+                    "name": "Leads by Stage",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reports/leads-by-stage",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "leads-by-stage"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Leads by Source",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reports/leads-by-source",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "leads-by-source"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Leads by Category",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reports/leads-by-category",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "leads-by-category"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Conversion",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reports/conversion",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "conversion"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Avg Days to Close",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reports/avg-days-to-close",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "avg-days-to-close"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Activity",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reports/activity",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "activity"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Followups Report",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reports/followups",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "followups"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Saved Filters",
+            "item": [
+                {
+                    "name": "Create Filter",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"Hot Leads in Mumbai\", \"filterJson\":\"{\\\"priority\\\":\\\"HOT\\\", \\\"city\\\":\\\"Mumbai\\\"}\"}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/saved-filters",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "saved-filters"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Filters",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/saved-filters",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "saved-filters"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Filter",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:8080/api/saved-filters/1",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "saved-filters",
+                                "1"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Reminders",
+            "item": [
+                {
+                    "name": "Reminder Summary",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reminders/summary",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reminders",
+                                "summary"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Due Now",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/reminders/due-now",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "reminders",
+                                "due-now"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Acknowledge Reminder",
+                    "request": {
+                        "method": "PATCH",
+                        "url": {
+                            "raw": "http://localhost:8080/api/followups/1/acknowledge",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "followups",
+                                "1",
+                                "acknowledge"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

@@ -112,3 +112,32 @@ curl -X POST http://localhost:8080/api/imports \
   -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu" \
   -F "file=@leads.csv"
 ```
+
+## Reports (Timezone: Asia/Kolkata)
+```bash
+curl -X GET "http://localhost:8080/api/reports/leads-by-stage?dateFrom=2026-09-01T00:00:00Z&dateTo=2026-09-30T23:59:59Z" -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X GET http://localhost:8080/api/reports/leads-by-source -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X GET http://localhost:8080/api/reports/leads-by-category -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X GET http://localhost:8080/api/reports/conversion -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X GET http://localhost:8080/api/reports/avg-days-to-close -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X GET http://localhost:8080/api/reports/activity -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X GET http://localhost:8080/api/reports/followups -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+```
+
+## Saved Filters
+```bash
+curl -X POST http://localhost:8080/api/saved-filters \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu" \
+  -d '{"name":"Hot Leads in Mumbai", "filterJson":"{\"priority\":\"HOT\", \"city\":\"Mumbai\"}"}'
+
+curl -X GET http://localhost:8080/api/saved-filters -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X DELETE http://localhost:8080/api/saved-filters/1 -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+```
+
+## Reminders
+```bash
+curl -X GET http://localhost:8080/api/reminders/summary -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X GET http://localhost:8080/api/reminders/due-now -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+curl -X PATCH http://localhost:8080/api/followups/1/acknowledge -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
+```

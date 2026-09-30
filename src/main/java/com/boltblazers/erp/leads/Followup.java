@@ -31,6 +31,12 @@ public class Followup {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "recurrence_days")
+    private Integer recurrenceDays;
+
+    @Column(name = "acknowledged_at")
+    private Instant acknowledgedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
