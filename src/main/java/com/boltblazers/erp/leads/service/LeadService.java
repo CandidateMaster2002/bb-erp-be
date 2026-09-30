@@ -27,11 +27,13 @@ public class LeadService {
     }
 
     public LeadResponse quickAdd(LeadQuickAddRequest request) {
-        // Check for duplicate phone
-        Optional<LeadContact> existingContact = contactRepository.findByValue(request.getPhone());
-        if (existingContact.isPresent()) {
-            Lead existing = existingContact.get().getLead();
-            throw new LeadConflictException(existing.getId(), existing.getFullName());
+        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
+            // Check for duplicate phone
+            Optional<LeadContact> existingContact = contactRepository.findByValue(request.getPhone());
+            if (existingContact.isPresent()) {
+                Lead existing = existingContact.get().getLead();
+                throw new LeadConflictException(existing.getId(), existing.getFullName());
+            }
         }
 
         Lead lead = new Lead();
@@ -40,12 +42,14 @@ public class LeadService {
         lead.setPriority(LeadPriority.WARM); // default
         leadRepository.save(lead);
 
-        LeadContact contact = new LeadContact();
-        contact.setLead(lead);
-        contact.setType(ContactType.MOBILE);
-        contact.setValue(request.getPhone());
-        contact.setIsPrimary(true);
-        contactRepository.save(contact);
+        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
+            LeadContact contact = new LeadContact();
+            contact.setLead(lead);
+            contact.setType(ContactType.MOBILE);
+            contact.setValue(request.getPhone());
+            contact.setIsPrimary(true);
+            contactRepository.save(contact);
+        }
 
         return mapToResponse(lead, false);
     }
