@@ -26,7 +26,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:3000}")
+    @Value("${CORS_ALLOWED_ORIGINS:http://localhost:5173,https://bb-erp.netlify.app}")
     private String corsAllowedOrigins;
 
     @Bean
@@ -64,8 +64,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         List<String> allowedOrigins = Arrays.asList(corsAllowedOrigins.split(","));
         configuration.setAllowedOrigins(allowedOrigins);
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
