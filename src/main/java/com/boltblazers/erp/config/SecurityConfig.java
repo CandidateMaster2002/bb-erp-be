@@ -48,10 +48,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/health", "/swagger-ui/**", "/v3/api-docs/**", "/api/auth/login").permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(withDefaults());
+                .anyRequest().permitAll()
+            );
         
         return http.build();
     }
