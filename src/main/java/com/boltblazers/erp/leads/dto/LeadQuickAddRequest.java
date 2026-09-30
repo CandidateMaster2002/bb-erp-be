@@ -5,10 +5,16 @@ import lombok.Data;
 
 @Data
 public class LeadQuickAddRequest {
-    @NotBlank(message = "Full name is required")
-    private String fullName;
+    @NotBlank(message = "Name is required")
+    private String name;
 
     private String phone;
 
-    private String note;
+    private String notes;
+
+    private String categoryId;
+    
+    private String stage;
+
+    private String priority;
 }

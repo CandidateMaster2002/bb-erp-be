@@ -20,10 +20,14 @@ import java.util.Optional;
 public class LeadService {
     private final LeadRepository leadRepository;
     private final LeadContactRepository contactRepository;
+    private final StageRepository stageRepository;
+    private final CategoryRepository categoryRepository;
 
-    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository) {
+    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository, StageRepository stageRepository, CategoryRepository categoryRepository) {
         this.leadRepository = leadRepository;
         this.contactRepository = contactRepository;
+        this.stageRepository = stageRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public LeadResponse quickAdd(LeadQuickAddRequest request) {
@@ -37,9 +41,35 @@ public class LeadService {
         }
 
         Lead lead = new Lead();
-        lead.setFullName(request.getFullName());
-        lead.setRemark(request.getNote());
-        lead.setPriority(LeadPriority.WARM); // default
+        lead.setFullName(request.getName());
+        lead.setRemark(request.getNotes());
+        
+        // Priority mapping
+        LeadPriority priority = LeadPriority.WARM;
+        if (request.getPriority() != null) {
+            String p = request.getPriority().toUpperCase();
+            if (p.contains("HIGH") || p.equals("HOT")) priority = LeadPriority.HOT;
+            else if (p.contains("LOW") || p.equals("COLD")) priority = LeadPriority.COLD;
+        }
+        lead.setPriority(priority);
+
+        // Stage mapping
+        if (request.getStage() != null) {
+            stageRepository.findAll().stream()
+                .filter(s -> s.getName().equalsIgnoreCase(request.getStage().trim()))
+                .findFirst()
+                .ifPresent(lead::setStage);
+        }
+
+        // Category mapping
+        if (request.getCategoryId() != null) {
+            String catIdStr = request.getCategoryId().replace("cat_", "");
+            try {
+                Long catId = Long.parseLong(catIdStr);
+                categoryRepository.findById(catId).ifPresent(c -> lead.setCategories(List.of(c)));
+            } catch (Exception ignored) {}
+        }
+
         leadRepository.save(lead);
 
         if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
