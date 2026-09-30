@@ -103,3 +103,12 @@ curl -X GET http://localhost:8080/api/commitments/pending \
 curl -X GET http://localhost:8080/api/dashboard \
   -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu"
 ```
+
+## Imports
+
+### Upload Leads CSV/Excel
+```bash
+curl -X POST http://localhost:8080/api/imports \
+  -H "Authorization: Basic YWRtaW5AYm9sdGJsYXplcnMuY29tOmFkbWlu" \
+  -F "file=@leads.csv"
+```

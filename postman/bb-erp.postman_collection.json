@@ -328,6 +328,54 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Imports",
+            "item": [
+                {
+                    "name": "Upload Leads File",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "leads.csv"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/imports",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "imports"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Imports History",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/imports",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "imports"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }
