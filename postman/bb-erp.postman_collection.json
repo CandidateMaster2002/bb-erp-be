@@ -1,0 +1,333 @@
+{
+    "info": {
+        "name": "BoltBlazers ERP",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "basic",
+        "basic": [
+            {
+                "key": "password",
+                "value": "admin",
+                "type": "string"
+            },
+            {
+                "key": "username",
+                "value": "admin@boltblazers.com",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Leads",
+            "item": [
+                {
+                    "name": "Quick Add Lead",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8080/api/leads",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "leads"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"fullName\":\"John Doe\", \"phone\":\"+1234567890\", \"note\":\"Met at conference\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "List Leads",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/leads?page=0&size=20",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "leads"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Lead Profile",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/leads/1",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "leads",
+                                "1"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Interactions",
+            "item": [
+                {
+                    "name": "Log Interaction",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8080/api/leads/1/interactions",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "leads",
+                                "1",
+                                "interactions"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"type\":\"CALL\", \"outcome\":\"PICKED_UP\", \"summary\":\"Discussed pricing\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Interactions",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/leads/1/interactions",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "leads",
+                                "1",
+                                "interactions"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Follow-ups",
+            "item": [
+                {
+                    "name": "Create Follow-up",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8080/api/leads/1/followups",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "leads",
+                                "1",
+                                "followups"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"dueAt\":\"2026-10-01T10:00:00Z\", \"note\":\"Call to confirm\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Follow-up Done",
+                    "request": {
+                        "method": "PATCH",
+                        "url": {
+                            "raw": "http://localhost:8080/api/followups/1/done",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "followups",
+                                "1",
+                                "done"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Snooze Follow-up",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8080/api/followups/1/snooze",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "followups",
+                                "1",
+                                "snooze"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"dueAt\":\"2026-10-02T10:00:00Z\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Today's Follow-ups",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/followups/today",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "followups",
+                                "today"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Commitments",
+            "item": [
+                {
+                    "name": "Create Commitment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8080/api/leads/1/commitments",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "leads",
+                                "1",
+                                "commitments"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"item\":\"Send Brochure\", \"dueDate\":\"2026-10-05\"}"
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Commitment Sent",
+                    "request": {
+                        "method": "PATCH",
+                        "url": {
+                            "raw": "http://localhost:8080/api/commitments/1/sent",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "commitments",
+                                "1",
+                                "sent"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Pending Commitments",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/commitments/pending",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "commitments",
+                                "pending"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Dashboard",
+            "item": [
+                {
+                    "name": "Get Dashboard",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:8080/api/dashboard",
+                            "host": [
+                                "http://localhost:8080"
+                            ],
+                            "path": [
+                                "api",
+                                "dashboard"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
