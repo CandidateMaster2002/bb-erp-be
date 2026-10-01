@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface LeadContactRepository extends JpaRepository<LeadContact, Long> {
     Optional<LeadContact> findByValue(String value);
+    java.util.List<LeadContact> findByLead(Lead lead);
 }

@@ -142,28 +142,15 @@ public class LeadService {
         res.setPriority(lead.getPriority());
         res.setNextFollowupAt(lead.getNextFollowupAt());
         
-        // Use flat fields if present, fallback to relations for imported data
+        // Use flat fields
         res.setJobTitle(lead.getJobTitle());
         res.setCompany(lead.getCompanyName());
         res.setLinkedinUrl(lead.getLinkedinUrl());
         
-        if (res.getLinkedinUrl() == null && lead.getLinkedin() != null) {
-            res.setLinkedinUrl(lead.getLinkedin().getLinkedinUrl());
-        }
-        
-        if (lead.getJobs() != null && !lead.getJobs().isEmpty()) {
-            LeadJob primaryJob = lead.getJobs().stream()
-                .filter(j -> Boolean.TRUE.equals(j.getIsCurrent()))
-                .findFirst()
-                .orElse(lead.getJobs().get(0));
-            if (res.getJobTitle() == null) res.setJobTitle(primaryJob.getJobTitle());
-            if (res.getCompany() == null && primaryJob.getCompany() != null) {
-                res.setCompany(primaryJob.getCompany().getName());
-            }
-        }
-        
-        if (lead.getContacts() != null) {
-            lead.getContacts().stream()
+        // Contacts repository is available, we can fetch mobile
+        List<LeadContact> contacts = contactRepository.findByLead(lead);
+        if (contacts != null) {
+            contacts.stream()
                 .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
                 .findFirst()
                 .ifPresent(c -> res.setMobileNumber(c.getValue()));
