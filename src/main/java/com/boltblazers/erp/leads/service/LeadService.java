@@ -107,6 +107,23 @@ public class LeadService {
             if (criteria.getStageId() != null) {
                 predicates.add(cb.equal(root.join("stage", JoinType.LEFT).get("id"), criteria.getStageId()));
             }
+            
+            if (criteria.getCategoryId() != null) {
+                predicates.add(cb.equal(root.join("categories", JoinType.LEFT).get("id"), criteria.getCategoryId()));
+            }
+            
+            if (Boolean.TRUE.equals(criteria.getHasMobileNo())) {
+                jakarta.persistence.criteria.Subquery<Long> sub = query.subquery(Long.class);
+                jakarta.persistence.criteria.Root<LeadContact> subRoot = sub.from(LeadContact.class);
+                sub.select(subRoot.get("lead").get("id"));
+                sub.where(
+                    cb.or(
+                        cb.equal(subRoot.get("type"), ContactType.MOBILE),
+                        cb.equal(subRoot.get("type"), ContactType.ASSUMED_MOBILE)
+                    )
+                );
+                predicates.add(root.get("id").in(sub));
+            }
 
             if (criteria.getPriority() != null) {
                 try {
