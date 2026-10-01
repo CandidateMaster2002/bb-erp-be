@@ -58,7 +58,6 @@ public class LeadImportService {
         return importRepository.findById(id).orElseThrow();
     }
 
-    @Transactional
     public ImportSummaryResponse processImport(MultipartFile file, List<Long> categoryIds, Long stageId) {
         ImportSummaryResponse summary = new ImportSummaryResponse();
         summary.setErrors(new ArrayList<>());

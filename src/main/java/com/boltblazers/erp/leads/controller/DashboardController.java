@@ -4,11 +4,9 @@ import com.boltblazers.erp.leads.dto.DashboardResponse;
 import com.boltblazers.erp.leads.service.DashboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/dashboard")
 public class DashboardController {
     
     private final DashboardService dashboardService;
@@ -17,7 +15,8 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping
+    // Support both /api/dashboard and /api/leads/dashboard/today (frontend uses the latter)
+    @GetMapping({"/api/dashboard", "/api/leads/dashboard/today"})
     public ResponseEntity<DashboardResponse> getDashboard() {
         return ResponseEntity.ok(dashboardService.getDashboardMetrics());
     }
