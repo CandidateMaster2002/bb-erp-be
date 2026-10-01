@@ -18,6 +18,10 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/bb_erp}
     user: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 server:
   port: ${PORT:8080}
