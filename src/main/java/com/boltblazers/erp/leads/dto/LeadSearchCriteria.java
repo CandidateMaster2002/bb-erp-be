@@ -16,4 +16,8 @@ public class LeadSearchCriteria {
     private Instant followupTo;
     private Integer notContactedDays;
     private Boolean hasNoFollowup;
+
+    public void setSearch(String search) {
+        this.q = search;
+    }
 }

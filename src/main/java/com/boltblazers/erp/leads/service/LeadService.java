@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.criteria.JoinType;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,8 +87,31 @@ public class LeadService {
 
     public Page<LeadResponse> search(LeadSearchCriteria criteria, Pageable pageable) {
         Specification<Lead> spec = (root, query, cb) -> {
-            // Very simplified specification for now to satisfy structural requirements
-            return cb.conjunction();
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            
+            if (criteria.getQ() != null && !criteria.getQ().trim().isEmpty()) {
+                String searchPattern = "%" + criteria.getQ().trim().toLowerCase() + "%";
+                predicates.add(
+                    cb.or(
+                        cb.like(cb.lower(root.get("fullName")), searchPattern),
+                        cb.like(cb.lower(root.get("firstName")), searchPattern),
+                        cb.like(cb.lower(root.get("lastName")), searchPattern)
+                    )
+                );
+            }
+            
+            if (criteria.getStageId() != null) {
+                predicates.add(cb.equal(root.join("stage", JoinType.LEFT).get("id"), criteria.getStageId()));
+            }
+
+            if (criteria.getPriority() != null) {
+                try {
+                    LeadPriority p = LeadPriority.valueOf(criteria.getPriority().toUpperCase());
+                    predicates.add(cb.equal(root.get("priority"), p));
+                } catch (IllegalArgumentException ignored) {}
+            }
+            
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
         return leadRepository.findAll(spec, pageable).map(l -> mapToResponse(l, false));
     }
