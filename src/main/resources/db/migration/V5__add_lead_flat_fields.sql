@@ -1,0 +1,3 @@
+ALTER TABLE leads ADD COLUMN job_title VARCHAR(255);
+ALTER TABLE leads ADD COLUMN linkedin_url TEXT;
+ALTER TABLE leads ADD COLUMN company_name VARCHAR(255);

@@ -44,6 +44,10 @@ public class LeadService {
         Lead lead = new Lead();
         lead.setFullName(request.getName());
         lead.setRemark(request.getNotes());
+        lead.setJobTitle(request.getJobTitle());
+        lead.setCompanyName(request.getCompany());
+        lead.setLinkedinUrl(request.getLinkedinUrl());
+        lead.setProfilePictureUrl(request.getProfilePictureUrl());
         
         // Priority mapping
         LeadPriority priority = LeadPriority.WARM;
@@ -129,13 +133,42 @@ public class LeadService {
         LeadResponse res = new LeadResponse();
         res.setId(lead.getId());
         res.setFullName(lead.getFullName());
+        res.setProfilePictureUrl(lead.getProfilePictureUrl());
+        
         if (lead.getStage() != null) {
             res.setStageId(lead.getStage().getId());
             res.setStageName(lead.getStage().getName());
         }
         res.setPriority(lead.getPriority());
         res.setNextFollowupAt(lead.getNextFollowupAt());
-        // For the sake of the scaffold, skip full mapping logic.
+        
+        // Use flat fields if present, fallback to relations for imported data
+        res.setJobTitle(lead.getJobTitle());
+        res.setCompany(lead.getCompanyName());
+        res.setLinkedinUrl(lead.getLinkedinUrl());
+        
+        if (res.getLinkedinUrl() == null && lead.getLinkedin() != null) {
+            res.setLinkedinUrl(lead.getLinkedin().getLinkedinUrl());
+        }
+        
+        if (lead.getJobs() != null && !lead.getJobs().isEmpty()) {
+            LeadJob primaryJob = lead.getJobs().stream()
+                .filter(j -> Boolean.TRUE.equals(j.getIsCurrent()))
+                .findFirst()
+                .orElse(lead.getJobs().get(0));
+            if (res.getJobTitle() == null) res.setJobTitle(primaryJob.getJobTitle());
+            if (res.getCompany() == null && primaryJob.getCompany() != null) {
+                res.setCompany(primaryJob.getCompany().getName());
+            }
+        }
+        
+        if (lead.getContacts() != null) {
+            lead.getContacts().stream()
+                .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
+                .findFirst()
+                .ifPresent(c -> res.setMobileNumber(c.getValue()));
+        }
+
         return res;
     }
 }

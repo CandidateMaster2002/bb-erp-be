@@ -45,6 +45,15 @@ public class Lead {
 
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
+    
+    @Column(name = "job_title")
+    private String jobTitle;
+    
+    @Column(name = "linkedin_url")
+    private String linkedinUrl;
+    
+    @Column(name = "company_name")
+    private String companyName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stage_id")

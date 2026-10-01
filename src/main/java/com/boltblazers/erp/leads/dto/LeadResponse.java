@@ -29,6 +29,12 @@ public class LeadResponse {
     private Instant createdAt;
     private Instant updatedAt;
     
+    // Flat fields for convenience in lists
+    private String jobTitle;
+    private String company;
+    private String mobileNumber;
+    private String linkedinUrl;
+    
     // Additional nested fields for the full profile
     private List<ContactDto> contacts;
     private LinkedinDto linkedin;
