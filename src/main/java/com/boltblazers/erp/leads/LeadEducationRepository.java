@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LeadEducationRepository extends JpaRepository<LeadEducation, Long> {
+    java.util.List<LeadEducation> findByLead(Lead lead);
 }

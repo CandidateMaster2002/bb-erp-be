@@ -40,8 +40,8 @@ public class LeadController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateLead(@PathVariable Long id, @RequestBody LeadQuickAddRequest request) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<LeadResponse> updateLead(@PathVariable Long id, @RequestBody LeadUpdateRequest request) {
+        return ResponseEntity.ok(leadService.updateLead(id, request));
     }
 
     @PutMapping("/{id}/categories")

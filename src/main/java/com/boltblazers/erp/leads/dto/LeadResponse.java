@@ -69,6 +69,9 @@ public class LeadResponse {
         private Long id;
         private String college;
         private String degree;
+        private String branch;
+        private String batchStart;
+        private String batchEnd;
     }
     
     @Data

@@ -22,11 +22,13 @@ public class LeadService {
     private final LeadRepository leadRepository;
     private final LeadContactRepository contactRepository;
     private final CategoryRepository categoryRepository;
+    private final LeadEducationRepository educationRepository;
 
-    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository, CategoryRepository categoryRepository) {
+    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository, CategoryRepository categoryRepository, LeadEducationRepository educationRepository) {
         this.leadRepository = leadRepository;
         this.contactRepository = contactRepository;
         this.categoryRepository = categoryRepository;
+        this.educationRepository = educationRepository;
     }
 
     public LeadResponse quickAdd(LeadQuickAddRequest request) {
@@ -140,26 +142,106 @@ public class LeadService {
         return mapToResponse(lead, false);
     }
 
+    public LeadResponse updateLead(Long leadId, com.boltblazers.erp.leads.dto.LeadUpdateRequest request) {
+        Lead lead = leadRepository.findById(leadId).orElseThrow();
+        
+        if (request.getFullName() != null) lead.setFullName(request.getFullName());
+        if (request.getHeadline() != null) lead.setHeadline(request.getHeadline());
+        if (request.getSummary() != null) lead.setSummary(request.getSummary());
+        if (request.getCity() != null) lead.setCity(request.getCity());
+        if (request.getState() != null) lead.setState(request.getState());
+        if (request.getCountry() != null) lead.setCountry(request.getCountry());
+        if (request.getLocation() != null) lead.setLocation(request.getLocation());
+        if (request.getProfilePictureUrl() != null) lead.setProfilePictureUrl(request.getProfilePictureUrl());
+        
+        if (request.getJobTitle() != null) lead.setJobTitle(request.getJobTitle());
+        if (request.getCompany() != null) lead.setCompanyName(request.getCompany());
+        if (request.getLinkedinUrl() != null) lead.setLinkedinUrl(request.getLinkedinUrl());
+        if (request.getRemark() != null) lead.setRemark(request.getRemark());
+        if (request.getPriority() != null) lead.setPriority(request.getPriority());
+
+        leadRepository.save(lead);
+        
+        if (request.getMobileNumber() != null) {
+            List<LeadContact> contacts = contactRepository.findByLead(lead);
+            LeadContact mobile = contacts.stream()
+                .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
+                .findFirst()
+                .orElseGet(() -> {
+                    LeadContact c = new LeadContact();
+                    c.setLead(lead);
+                    c.setType(ContactType.MOBILE);
+                    c.setIsPrimary(true);
+                    return c;
+                });
+            mobile.setValue(request.getMobileNumber());
+            contactRepository.save(mobile);
+        }
+
+        if (request.getPersonalEmail() != null) {
+            List<LeadContact> contacts = contactRepository.findByLead(lead);
+            LeadContact email = contacts.stream()
+                .filter(c -> c.getType() == ContactType.PERSONAL_EMAIL)
+                .findFirst()
+                .orElseGet(() -> {
+                    LeadContact c = new LeadContact();
+                    c.setLead(lead);
+                    c.setType(ContactType.PERSONAL_EMAIL);
+                    c.setIsPrimary(true);
+                    return c;
+                });
+            email.setValue(request.getPersonalEmail());
+            contactRepository.save(email);
+        }
+
+        return mapToResponse(lead, true);
+    }
+
     private LeadResponse mapToResponse(Lead lead, boolean includeRelations) {
         LeadResponse res = new LeadResponse();
         res.setId(lead.getId());
         res.setFullName(lead.getFullName());
+        res.setFirstName(lead.getFirstName());
+        res.setLastName(lead.getLastName());
+        res.setHeadline(lead.getHeadline());
+        res.setSummary(lead.getSummary());
+        res.setCity(lead.getCity());
+        res.setState(lead.getState());
+        res.setCountry(lead.getCountry());
+        res.setLocation(lead.getLocation());
         res.setProfilePictureUrl(lead.getProfilePictureUrl());
         res.setPriority(lead.getPriority());
+        res.setSource(lead.getSource());
+        res.setRemark(lead.getRemark());
         res.setNextFollowupAt(lead.getNextFollowupAt());
+        res.setLastContactedAt(lead.getLastContactedAt());
+        res.setLostReason(lead.getLostReason());
+        res.setCreatedAt(lead.getCreatedAt());
+        res.setUpdatedAt(lead.getUpdatedAt());
         
         // Use flat fields
         res.setJobTitle(lead.getJobTitle());
         res.setCompany(lead.getCompanyName());
         res.setLinkedinUrl(lead.getLinkedinUrl());
         
-        // Contacts repository is available, we can fetch mobile
+        // Contacts
         List<LeadContact> contacts = contactRepository.findByLead(lead);
         if (contacts != null) {
             contacts.stream()
                 .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
                 .findFirst()
                 .ifPresent(c -> res.setMobileNumber(c.getValue()));
+
+            if (includeRelations) {
+                res.setContacts(contacts.stream().map(c -> {
+                    LeadResponse.ContactDto dto = new LeadResponse.ContactDto();
+                    dto.setId(c.getId());
+                    dto.setType(c.getType().name());
+                    dto.setValue(c.getValue());
+                    dto.setIsPrimary(c.getIsPrimary());
+                    return dto;
+                }).collect(java.util.stream.Collectors.toList()));
+            }
         }
 
         // Map categories
@@ -170,6 +252,22 @@ public class LeadService {
                 dto.setName(cat.getName());
                 return dto;
             }).collect(java.util.stream.Collectors.toList()));
+        }
+
+        if (includeRelations) {
+            List<LeadEducation> eduList = educationRepository.findByLead(lead);
+            if (eduList != null && !eduList.isEmpty()) {
+                res.setEducation(eduList.stream().map(e -> {
+                    LeadResponse.EducationDto dto = new LeadResponse.EducationDto();
+                    dto.setId(e.getId());
+                    dto.setCollege(e.getCollege());
+                    dto.setDegree(e.getDegree());
+                    dto.setBranch(e.getBranch());
+                    dto.setBatchStart(e.getBatchStart());
+                    dto.setBatchEnd(e.getBatchEnd());
+                    return dto;
+                }).collect(java.util.stream.Collectors.toList()));
+            }
         }
 
         return res;
