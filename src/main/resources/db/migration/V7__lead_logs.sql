@@ -5,8 +5,10 @@ CREATE TABLE lead_logs (
     comment TEXT,
     next_action TEXT,
     next_action_date DATE,
+    action_status VARCHAR(20) DEFAULT 'PENDING',
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_lead_logs_lead_id ON lead_logs(lead_id);
 CREATE INDEX idx_lead_logs_next_action_date ON lead_logs(next_action_date);
+CREATE INDEX idx_lead_logs_action_status ON lead_logs(action_status);

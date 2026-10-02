@@ -43,7 +43,19 @@ public class LeadLogController {
         return ResponseEntity.noContent().build();
     }
 
-    // ========== Actions View (date-wise agenda) ==========
+    // ========== Mark Complete / Cancel ==========
+
+    @PatchMapping("/leads/logs/{logId}/complete")
+    public ResponseEntity<LeadLogResponse> markCompleted(@PathVariable Long logId) {
+        return ResponseEntity.ok(logService.markCompleted(logId));
+    }
+
+    @PatchMapping("/leads/logs/{logId}/cancel")
+    public ResponseEntity<LeadLogResponse> markCancelled(@PathVariable Long logId) {
+        return ResponseEntity.ok(logService.markCancelled(logId));
+    }
+
+    // ========== Actions View (date-wise agenda, only PENDING) ==========
 
     @GetMapping("/actions/today")
     public ResponseEntity<List<LeadLogResponse>> getTodayActions() {

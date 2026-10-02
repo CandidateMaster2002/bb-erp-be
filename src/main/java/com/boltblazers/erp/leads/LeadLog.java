@@ -28,6 +28,10 @@ public class LeadLog {
     @Column(name = "next_action_date")
     private LocalDate nextActionDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "action_status")
+    private ActionStatus actionStatus = ActionStatus.PENDING;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

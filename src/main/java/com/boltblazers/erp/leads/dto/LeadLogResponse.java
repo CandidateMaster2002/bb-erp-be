@@ -10,5 +10,6 @@ public class LeadLogResponse {
     private String comment;
     private String nextAction;
     private String nextActionDate;
+    private String actionStatus;
     private String createdAt;
 }
