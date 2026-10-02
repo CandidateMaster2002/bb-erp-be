@@ -1,0 +1,4 @@
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_stage_id_fkey;
+DROP INDEX IF EXISTS idx_leads_stage_id;
+ALTER TABLE leads DROP COLUMN stage_id;
+DROP TABLE IF EXISTS stages CASCADE;

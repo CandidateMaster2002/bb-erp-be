@@ -21,13 +21,11 @@ import java.util.Optional;
 public class LeadService {
     private final LeadRepository leadRepository;
     private final LeadContactRepository contactRepository;
-    private final StageRepository stageRepository;
     private final CategoryRepository categoryRepository;
 
-    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository, StageRepository stageRepository, CategoryRepository categoryRepository) {
+    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository, CategoryRepository categoryRepository) {
         this.leadRepository = leadRepository;
         this.contactRepository = contactRepository;
-        this.stageRepository = stageRepository;
         this.categoryRepository = categoryRepository;
     }
 
@@ -57,14 +55,6 @@ public class LeadService {
             else if (p.contains("LOW") || p.equals("COLD")) priority = LeadPriority.COLD;
         }
         lead.setPriority(priority);
-
-        // Stage mapping
-        if (request.getStage() != null) {
-            stageRepository.findAll().stream()
-                .filter(s -> s.getName().equalsIgnoreCase(request.getStage().trim()))
-                .findFirst()
-                .ifPresent(lead::setStage);
-        }
 
         // Category mapping
         if (request.getCategoryId() != null) {
@@ -102,10 +92,6 @@ public class LeadService {
                         cb.like(cb.lower(root.get("lastName")), searchPattern)
                     )
                 );
-            }
-            
-            if (criteria.getStageId() != null) {
-                predicates.add(cb.equal(root.join("stage", JoinType.LEFT).get("id"), criteria.getStageId()));
             }
             
             if (criteria.getCategoryId() != null) {
@@ -146,17 +132,6 @@ public class LeadService {
         leadRepository.deleteById(id);
     }
 
-    public LeadResponse updateStage(Long leadId, Long stageId) {
-        Lead lead = leadRepository.findById(leadId).orElseThrow();
-        if (stageId != null) {
-            stageRepository.findById(stageId).ifPresent(lead::setStage);
-        } else {
-            lead.setStage(null);
-        }
-        leadRepository.save(lead);
-        return mapToResponse(lead, false);
-    }
-
     public LeadResponse updateCategories(Long leadId, List<Long> categoryIds) {
         Lead lead = leadRepository.findById(leadId).orElseThrow();
         List<Category> categories = categoryRepository.findAllById(categoryIds);
@@ -170,11 +145,6 @@ public class LeadService {
         res.setId(lead.getId());
         res.setFullName(lead.getFullName());
         res.setProfilePictureUrl(lead.getProfilePictureUrl());
-        
-        if (lead.getStage() != null) {
-            res.setStageId(lead.getStage().getId());
-            res.setStageName(lead.getStage().getName());
-        }
         res.setPriority(lead.getPriority());
         res.setNextFollowupAt(lead.getNextFollowupAt());
         

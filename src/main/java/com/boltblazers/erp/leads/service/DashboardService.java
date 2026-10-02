@@ -60,17 +60,6 @@ public class DashboardService {
                 .getSingleResult();
         res.setNewLeadsThisWeek(newLeads != null ? newLeads : 0);
 
-        // Leads by stage
-        List<Tuple> stages = em.createQuery(
-                "SELECT s.name as stageName, COUNT(l) as stageCount FROM Lead l JOIN l.stage s GROUP BY s.name", Tuple.class)
-                .getResultList();
-        
-        Map<String, Long> leadsByStage = new HashMap<>();
-        for (Tuple t : stages) {
-            leadsByStage.put(t.get(0, String.class), t.get(1, Long.class));
-        }
-        res.setLeadsByStage(leadsByStage);
-
         return res;
     }
 }

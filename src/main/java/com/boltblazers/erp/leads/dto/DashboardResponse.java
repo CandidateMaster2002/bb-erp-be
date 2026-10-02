@@ -9,5 +9,4 @@ public class DashboardResponse {
     private long overdueFollowups;
     private long pendingCommitments;
     private long newLeadsThisWeek;
-    private Map<String, Long> leadsByStage;
 }

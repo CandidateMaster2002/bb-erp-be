@@ -55,10 +55,6 @@ public class Lead {
     @Column(name = "company_name")
     private String companyName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stage_id")
-    private Stage stage;
-
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
     private LeadPriority priority;

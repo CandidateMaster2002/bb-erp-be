@@ -13,7 +13,6 @@ public class LeadQuickAddRequest {
     private String notes;
 
     private String categoryId;
-    private String stage;
     private String priority;
     
     private String jobTitle;

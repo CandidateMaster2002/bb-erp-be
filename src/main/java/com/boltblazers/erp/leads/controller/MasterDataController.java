@@ -1,7 +1,5 @@
 package com.boltblazers.erp.leads.controller;
 
-import com.boltblazers.erp.leads.Stage;
-import com.boltblazers.erp.leads.StageRepository;
 import com.boltblazers.erp.leads.dto.CategoryGroupResponse;
 import com.boltblazers.erp.leads.dto.CategoryRequest;
 import com.boltblazers.erp.leads.service.CategoryService;
@@ -16,18 +14,9 @@ import java.util.List;
 public class MasterDataController {
 
     private final CategoryService categoryService;
-    private final StageRepository stageRepository;
 
-    public MasterDataController(CategoryService categoryService, StageRepository stageRepository) {
+    public MasterDataController(CategoryService categoryService) {
         this.categoryService = categoryService;
-        this.stageRepository = stageRepository;
-    }
-
-    // ==================== STAGES ====================
-
-    @GetMapping("/stages")
-    public ResponseEntity<List<Stage>> getStages() {
-        return ResponseEntity.ok(stageRepository.findAll());
     }
 
     // ==================== CATEGORY GROUPS ====================

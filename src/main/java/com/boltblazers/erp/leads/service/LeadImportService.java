@@ -18,7 +18,6 @@ public class LeadImportService {
 
     private final ImportRepository importRepository;
     private final LeadRepository leadRepository;
-    private final StageRepository stageRepository;
     private final CategoryRepository categoryRepository;
     private final CompanyRepository companyRepository;
     private final LeadContactRepository contactRepository;
@@ -30,7 +29,6 @@ public class LeadImportService {
     public LeadImportService(
             ImportRepository importRepository,
             LeadRepository leadRepository,
-            StageRepository stageRepository,
             CategoryRepository categoryRepository,
             CompanyRepository companyRepository,
             LeadContactRepository contactRepository,
@@ -40,7 +38,6 @@ public class LeadImportService {
             BatchImportProcessor batchProcessor) {
         this.importRepository = importRepository;
         this.leadRepository = leadRepository;
-        this.stageRepository = stageRepository;
         this.categoryRepository = categoryRepository;
         this.companyRepository = companyRepository;
         this.contactRepository = contactRepository;
@@ -58,7 +55,7 @@ public class LeadImportService {
         return importRepository.findById(id).orElseThrow();
     }
 
-    public ImportSummaryResponse processImport(MultipartFile file, List<Long> categoryIds, Long stageId) {
+    public ImportSummaryResponse processImport(MultipartFile file, List<Long> categoryIds) {
         ImportSummaryResponse summary = new ImportSummaryResponse();
         summary.setErrors(new ArrayList<>());
         
@@ -80,7 +77,7 @@ public class LeadImportService {
             batch.add(row);
             
             if (batch.size() >= batchSize || i == rows.size() - 1) {
-                batchProcessor.processBatch(batch, imp, categoryIds, stageId, summary);
+                batchProcessor.processBatch(batch, imp, categoryIds, summary);
                 batch.clear();
             }
         }

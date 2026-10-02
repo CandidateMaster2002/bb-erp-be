@@ -6,7 +6,6 @@ import java.time.Instant;
 @Data
 public class LeadSearchCriteria {
     private String q;
-    private Long stageId;
     private Long categoryId;
     private Long tagId;
     private String priority;

@@ -21,10 +21,9 @@ public class ImportController {
     @PostMapping
     public ResponseEntity<ImportSummaryResponse> uploadFile(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "categoryIds", required = false) List<Long> categoryIds,
-            @RequestParam(value = "stageId", required = false) Long stageId) {
+            @RequestParam(value = "categoryIds", required = false) List<Long> categoryIds) {
             
-        ImportSummaryResponse summary = leadImportService.processImport(file, categoryIds, stageId);
+        ImportSummaryResponse summary = leadImportService.processImport(file, categoryIds);
         return ResponseEntity.ok(summary);
     }
 

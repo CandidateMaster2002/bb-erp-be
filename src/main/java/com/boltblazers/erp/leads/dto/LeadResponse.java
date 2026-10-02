@@ -18,8 +18,6 @@ public class LeadResponse {
     private String country;
     private String location;
     private String profilePictureUrl;
-    private Long stageId;
-    private String stageName;
     private LeadPriority priority;
     private String source;
     private String remark;

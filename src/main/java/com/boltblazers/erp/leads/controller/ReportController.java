@@ -10,13 +10,6 @@ import java.util.Map;
 @RequestMapping("/api/reports")
 public class ReportController {
 
-    @GetMapping("/leads-by-stage")
-    public ResponseEntity<?> getLeadsByStage(
-            @RequestParam(required = false) Instant dateFrom,
-            @RequestParam(required = false) Instant dateTo) {
-        return ResponseEntity.ok(Map.of());
-    }
-
     @GetMapping("/leads-by-source")
     public ResponseEntity<?> getLeadsBySource(
             @RequestParam(required = false) Instant dateFrom,

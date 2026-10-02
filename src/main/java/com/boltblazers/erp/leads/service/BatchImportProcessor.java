@@ -18,7 +18,6 @@ public class BatchImportProcessor {
     private final CompanyRepository companyRepository;
     private final LeadJobRepository jobRepository;
     private final LeadEducationRepository educationRepository;
-    private final StageRepository stageRepository;
     private final CategoryRepository categoryRepository;
 
     public BatchImportProcessor(
@@ -28,7 +27,6 @@ public class BatchImportProcessor {
             CompanyRepository companyRepository,
             LeadJobRepository jobRepository,
             LeadEducationRepository educationRepository,
-            StageRepository stageRepository,
             CategoryRepository categoryRepository) {
         this.leadRepository = leadRepository;
         this.contactRepository = contactRepository;
@@ -36,7 +34,6 @@ public class BatchImportProcessor {
         this.companyRepository = companyRepository;
         this.jobRepository = jobRepository;
         this.educationRepository = educationRepository;
-        this.stageRepository = stageRepository;
         this.categoryRepository = categoryRepository;
     }
 
@@ -45,18 +42,9 @@ public class BatchImportProcessor {
             List<Map<String, String>> batch, 
             Import imp, 
             List<Long> defaultCategoryIds, 
-            Long defaultStageId, 
             ImportSummaryResponse summary) {
 
         // Fetch defaults
-        Stage defaultStage = null;
-        if (defaultStageId != null) {
-            defaultStage = stageRepository.findById(defaultStageId).orElse(null);
-        }
-        if (defaultStage == null) {
-            defaultStage = stageRepository.findAll().stream()
-                    .filter(s -> "New".equalsIgnoreCase(s.getName())).findFirst().orElse(null);
-        }
 
         List<Category> defaultCategories = new ArrayList<>();
         if (defaultCategoryIds != null) {
@@ -65,7 +53,7 @@ public class BatchImportProcessor {
 
         for (Map<String, String> row : batch) {
             try {
-                processRow(row, imp, defaultStage, defaultCategories, summary);
+                processRow(row, imp, defaultCategories, summary);
             } catch (Exception e) {
                 int rowIndex = Integer.parseInt(row.getOrDefault("_row_index", "0"));
                 summary.getErrors().add(new ImportSummaryResponse.RowError(rowIndex, e.getMessage()));
@@ -74,7 +62,7 @@ public class BatchImportProcessor {
         }
     }
 
-    private void processRow(Map<String, String> row, Import imp, Stage defaultStage, List<Category> defaultCategories, ImportSummaryResponse summary) {
+    private void processRow(Map<String, String> row, Import imp, List<Category> defaultCategories, ImportSummaryResponse summary) {
         String linkedinUrl = row.get("linkedin_url");
         String linkedinPublicId = row.get("public_identifier");
         String mobile = row.get("mobile_number");
@@ -103,16 +91,6 @@ public class BatchImportProcessor {
             lead.setSourceImport(imp);
             lead.setPriority(LeadPriority.WARM);
             lead.setSource("IMPORT");
-            
-            // Match stage
-            String status = row.get("lead_status");
-            Stage stage = defaultStage;
-            if (StringUtils.hasText(status)) {
-                stage = stageRepository.findAll().stream()
-                        .filter(s -> s.getName().equalsIgnoreCase(status.trim()))
-                        .findFirst().orElse(defaultStage);
-            }
-            lead.setStage(stage);
             
             // Categories
             Set<Category> categories = new HashSet<>(defaultCategories);

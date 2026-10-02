@@ -44,11 +44,6 @@ public class LeadController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{id}/stage")
-    public ResponseEntity<LeadResponse> updateStage(@PathVariable Long id, @RequestBody java.util.Map<String, Long> request) {
-        return ResponseEntity.ok(leadService.updateStage(id, request.get("stageId")));
-    }
-
     @PutMapping("/{id}/categories")
     public ResponseEntity<LeadResponse> updateCategories(@PathVariable Long id, @RequestBody java.util.List<Long> categoryIds) {
         return ResponseEntity.ok(leadService.updateCategories(id, categoryIds));
