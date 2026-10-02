@@ -2,6 +2,7 @@ package com.boltblazers.erp.leads.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class LeadQuickAddRequest {
@@ -9,14 +10,21 @@ public class LeadQuickAddRequest {
     private String name;
 
     private String phone;
-
+    private String personalEmail;
     private String notes;
 
-    private String categoryId;
+    private List<Long> categoryIds;
     private String priority;
     
     private String jobTitle;
     private String company;
     private String linkedinUrl;
     private String profilePictureUrl;
+
+    private String city;
+    private String state;
+    private String country;
+    private String location;
+    private String headline;
+    private String summary;
 }

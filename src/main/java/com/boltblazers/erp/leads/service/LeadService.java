@@ -40,6 +40,15 @@ public class LeadService {
                 throw new LeadConflictException(existing.getId(), existing.getFullName());
             }
         }
+        
+        if (request.getPersonalEmail() != null && !request.getPersonalEmail().trim().isEmpty()) {
+            // Check for duplicate email
+            Optional<LeadContact> existingContact = contactRepository.findByValue(request.getPersonalEmail());
+            if (existingContact.isPresent()) {
+                Lead existing = existingContact.get().getLead();
+                throw new LeadConflictException(existing.getId(), existing.getFullName());
+            }
+        }
 
         Lead lead = new Lead();
         lead.setFullName(request.getName());
@@ -48,6 +57,14 @@ public class LeadService {
         lead.setCompanyName(request.getCompany());
         lead.setLinkedinUrl(request.getLinkedinUrl());
         lead.setProfilePictureUrl(request.getProfilePictureUrl());
+        
+        // Detailed fields
+        lead.setCity(request.getCity());
+        lead.setState(request.getState());
+        lead.setCountry(request.getCountry());
+        lead.setLocation(request.getLocation());
+        lead.setHeadline(request.getHeadline());
+        lead.setSummary(request.getSummary());
         
         // Priority mapping
         LeadPriority priority = LeadPriority.WARM;
@@ -59,12 +76,9 @@ public class LeadService {
         lead.setPriority(priority);
 
         // Category mapping
-        if (request.getCategoryId() != null) {
-            String catIdStr = request.getCategoryId().replace("cat_", "");
-            try {
-                Long catId = Long.parseLong(catIdStr);
-                categoryRepository.findById(catId).ifPresent(c -> lead.setCategories(List.of(c)));
-            } catch (Exception ignored) {}
+        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
+            List<Category> categories = categoryRepository.findAllById(request.getCategoryIds());
+            lead.setCategories(categories);
         }
 
         leadRepository.save(lead);
@@ -74,6 +88,15 @@ public class LeadService {
             contact.setLead(lead);
             contact.setType(ContactType.MOBILE);
             contact.setValue(request.getPhone());
+            contact.setIsPrimary(true);
+            contactRepository.save(contact);
+        }
+
+        if (request.getPersonalEmail() != null && !request.getPersonalEmail().trim().isEmpty()) {
+            LeadContact contact = new LeadContact();
+            contact.setLead(lead);
+            contact.setType(ContactType.PERSONAL_EMAIL);
+            contact.setValue(request.getPersonalEmail());
             contact.setIsPrimary(true);
             contactRepository.save(contact);
         }
