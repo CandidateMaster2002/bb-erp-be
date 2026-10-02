@@ -146,6 +146,25 @@ public class LeadService {
         leadRepository.deleteById(id);
     }
 
+    public LeadResponse updateStage(Long leadId, Long stageId) {
+        Lead lead = leadRepository.findById(leadId).orElseThrow();
+        if (stageId != null) {
+            stageRepository.findById(stageId).ifPresent(lead::setStage);
+        } else {
+            lead.setStage(null);
+        }
+        leadRepository.save(lead);
+        return mapToResponse(lead, false);
+    }
+
+    public LeadResponse updateCategories(Long leadId, List<Long> categoryIds) {
+        Lead lead = leadRepository.findById(leadId).orElseThrow();
+        List<Category> categories = categoryRepository.findAllById(categoryIds);
+        lead.setCategories(categories);
+        leadRepository.save(lead);
+        return mapToResponse(lead, false);
+    }
+
     private LeadResponse mapToResponse(Lead lead, boolean includeRelations) {
         LeadResponse res = new LeadResponse();
         res.setId(lead.getId());
@@ -173,6 +192,17 @@ public class LeadService {
                 .ifPresent(c -> res.setMobileNumber(c.getValue()));
         }
 
+        // Map categories
+        if (lead.getCategories() != null && !lead.getCategories().isEmpty()) {
+            res.setCategories(lead.getCategories().stream().map(cat -> {
+                LeadResponse.CategoryDto dto = new LeadResponse.CategoryDto();
+                dto.setId(cat.getId());
+                dto.setName(cat.getName());
+                return dto;
+            }).collect(java.util.stream.Collectors.toList()));
+        }
+
         return res;
     }
 }
+
