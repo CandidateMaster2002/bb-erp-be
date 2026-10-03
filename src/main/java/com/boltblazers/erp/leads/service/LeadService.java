@@ -110,11 +110,18 @@ public class LeadService {
             
             if (criteria.getQ() != null && !criteria.getQ().trim().isEmpty()) {
                 String searchPattern = "%" + criteria.getQ().trim().toLowerCase() + "%";
+                
+                jakarta.persistence.criteria.Subquery<Long> contactSubquery = query.subquery(Long.class);
+                jakarta.persistence.criteria.Root<LeadContact> contactRoot = contactSubquery.from(LeadContact.class);
+                contactSubquery.select(contactRoot.get("lead").get("id"));
+                contactSubquery.where(cb.like(cb.lower(contactRoot.get("value")), searchPattern));
+
                 predicates.add(
                     cb.or(
                         cb.like(cb.lower(root.get("fullName")), searchPattern),
                         cb.like(cb.lower(root.get("firstName")), searchPattern),
-                        cb.like(cb.lower(root.get("lastName")), searchPattern)
+                        cb.like(cb.lower(root.get("lastName")), searchPattern),
+                        root.get("id").in(contactSubquery)
                     )
                 );
             }
