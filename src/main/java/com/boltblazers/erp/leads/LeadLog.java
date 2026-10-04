@@ -26,7 +26,7 @@ public class LeadLog {
     private String nextAction;
 
     @Column(name = "next_action_date")
-    private LocalDate nextActionDate;
+    private java.time.Instant nextActionDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "action_status")

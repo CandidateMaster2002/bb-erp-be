@@ -6,8 +6,9 @@ import com.boltblazers.erp.leads.dto.LeadLogResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,15 @@ public class LeadLogService {
 
     // ========== Per-Lead Operations ==========
 
+    private Instant parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) return null;
+        dateStr = dateStr.trim();
+        if (dateStr.length() == 10) {
+            return LocalDate.parse(dateStr).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        }
+        return Instant.parse(dateStr);
+    }
+
     public LeadLogResponse addLog(Long leadId, LeadLogRequest request) {
         Lead lead = leadRepository.findById(leadId).orElseThrow();
 
@@ -32,9 +42,7 @@ public class LeadLogService {
         log.setLead(lead);
         log.setComment(request.getComment());
         log.setNextAction(request.getNextAction());
-        if (request.getNextActionDate() != null && !request.getNextActionDate().isBlank()) {
-            log.setNextActionDate(LocalDate.parse(request.getNextActionDate()));
-        }
+        log.setNextActionDate(parseDate(request.getNextActionDate()));
         log.setActionStatus(ActionStatus.PENDING);
         logRepository.save(log);
         return toResponse(log);
@@ -49,8 +57,8 @@ public class LeadLogService {
         LeadLog log = logRepository.findById(logId).orElseThrow();
         if (request.getComment() != null) log.setComment(request.getComment());
         if (request.getNextAction() != null) log.setNextAction(request.getNextAction());
-        if (request.getNextActionDate() != null && !request.getNextActionDate().isBlank()) {
-            log.setNextActionDate(LocalDate.parse(request.getNextActionDate()));
+        if (request.getNextActionDate() != null) {
+            log.setNextActionDate(parseDate(request.getNextActionDate()));
         }
         logRepository.save(log);
         return toResponse(log);
@@ -79,18 +87,23 @@ public class LeadLogService {
     // ========== Actions View (date-wise, only PENDING) ==========
 
     public List<LeadLogResponse> getActionsForDate(LocalDate date) {
-        return logRepository.findPendingActionsForDate(date)
+        Instant start = date.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant end = date.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        return logRepository.findPendingActionsForDateRange(start, end)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     public List<LeadLogResponse> getOverdueAndTodayActions() {
         LocalDate today = LocalDate.now();
-        return logRepository.findOverdueAndTodayPendingActions(today)
+        Instant end = today.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        return logRepository.findOverdueAndTodayPendingActions(end)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     public List<LeadLogResponse> getActionsBetween(LocalDate from, LocalDate to) {
-        return logRepository.findPendingActionsBetween(from, to)
+        Instant start = from.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant end = to.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        return logRepository.findPendingActionsBetween(start, end)
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
@@ -105,7 +118,7 @@ public class LeadLogService {
         res.setNextAction(log.getNextAction());
         res.setActionStatus(log.getActionStatus() != null ? log.getActionStatus().name() : null);
         if (log.getNextActionDate() != null) {
-            res.setNextActionDate(log.getNextActionDate().format(DateTimeFormatter.ISO_LOCAL_DATE));
+            res.setNextActionDate(log.getNextActionDate().toString());
         }
         if (log.getCreatedAt() != null) {
             res.setCreatedAt(log.getCreatedAt().toString());
