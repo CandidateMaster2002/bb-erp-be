@@ -121,6 +121,16 @@ public class LeadService {
                         cb.like(cb.lower(root.get("fullName")), searchPattern),
                         cb.like(cb.lower(root.get("firstName")), searchPattern),
                         cb.like(cb.lower(root.get("lastName")), searchPattern),
+                        cb.like(cb.lower(root.get("companyName")), searchPattern),
+                        cb.like(cb.lower(root.get("jobTitle")), searchPattern),
+                        cb.like(cb.lower(root.get("city")), searchPattern),
+                        cb.like(cb.lower(root.get("state")), searchPattern),
+                        cb.like(cb.lower(root.get("country")), searchPattern),
+                        cb.like(cb.lower(root.get("location")), searchPattern),
+                        cb.like(cb.lower(root.get("headline")), searchPattern),
+                        cb.like(cb.lower(root.get("summary")), searchPattern),
+                        cb.like(cb.lower(root.get("linkedinUrl")), searchPattern),
+                        cb.like(cb.lower(root.get("remark")), searchPattern),
                         root.get("id").in(contactSubquery)
                     )
                 );
