@@ -30,7 +30,14 @@ public class TaskService {
         if (dateStr.length() == 10) {
             return LocalDate.parse(dateStr).atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
-        return Instant.parse(dateStr);
+        try {
+            if (dateStr.endsWith("Z") || dateStr.contains("+") || dateStr.indexOf("-", 10) != -1) {
+                return Instant.parse(dateStr);
+            }
+            return java.time.LocalDateTime.parse(dateStr).atZone(ZoneId.of("UTC")).toInstant();
+        } catch (Exception e) {
+            return Instant.parse(dateStr);
+        }
     }
 
     public TaskResponse addTask(TaskRequest request) {
