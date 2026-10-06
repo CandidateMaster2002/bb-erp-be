@@ -1,0 +1,11 @@
+CREATE TABLE lead_links (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    lead_id BIGINT NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_lead_links_lead_id ON lead_links(lead_id);
