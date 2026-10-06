@@ -22,8 +22,9 @@ public class MasterDataController {
     // ==================== CATEGORY GROUPS ====================
 
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryGroupResponse>> getCategories() {
-        return ResponseEntity.ok(categoryService.getAllGroups());
+    public ResponseEntity<List<CategoryGroupResponse>> getCategories(
+            @RequestParam(required = false, defaultValue = "LEAD") String type) {
+        return ResponseEntity.ok(categoryService.getAllGroups(type));
     }
 
     @GetMapping("/categories/{id}")

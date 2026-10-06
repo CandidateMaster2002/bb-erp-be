@@ -13,6 +13,7 @@ public class LeadResponse {
     private String lastName;
     private String headline;
     private String summary;
+    private String recordType;
     private String city;
     private String state;
     private String country;

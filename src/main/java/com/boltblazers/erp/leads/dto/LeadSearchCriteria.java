@@ -12,6 +12,7 @@ public class LeadSearchCriteria {
     private String priority;
     private String source;
     private String city;
+    private String recordType = "LEAD";
     private Instant followupFrom;
     private Instant followupTo;
     private Integer notContactedDays;

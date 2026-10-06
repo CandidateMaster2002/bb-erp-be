@@ -22,9 +22,10 @@ public class CategoryService {
 
     // ========== Category Groups (parents) ==========
 
-    public List<CategoryGroupResponse> getAllGroups() {
+    public List<CategoryGroupResponse> getAllGroups(String categoryType) {
+        String type = (categoryType != null) ? categoryType : "LEAD";
         List<Category> parents = categoryRepository.findAll().stream()
-                .filter(c -> c.getParent() == null)
+                .filter(c -> c.getParent() == null && type.equals(c.getCategoryType()))
                 .collect(Collectors.toList());
 
         return parents.stream().map(this::toGroupResponse).collect(Collectors.toList());
@@ -42,6 +43,9 @@ public class CategoryService {
     public CategoryGroupResponse createGroup(CategoryRequest request) {
         Category group = new Category();
         group.setName(request.getName().trim());
+        if (request.getCategoryType() != null) {
+            group.setCategoryType(request.getCategoryType());
+        }
         categoryRepository.save(group);
         return toGroupResponse(group);
     }
@@ -78,6 +82,7 @@ public class CategoryService {
         Category value = new Category();
         value.setName(request.getName().trim());
         value.setParent(group);
+        value.setCategoryType(group.getCategoryType());
         categoryRepository.save(value);
 
         CategoryGroupResponse.CategoryValueResponse res = new CategoryGroupResponse.CategoryValueResponse();
@@ -116,6 +121,7 @@ public class CategoryService {
         CategoryGroupResponse res = new CategoryGroupResponse();
         res.setId(group.getId());
         res.setName(group.getName());
+        res.setCategoryType(group.getCategoryType());
 
         List<CategoryGroupResponse.CategoryValueResponse> values = group.getChildren().stream()
                 .map(child -> {

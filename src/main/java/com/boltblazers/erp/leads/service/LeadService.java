@@ -58,6 +58,10 @@ public class LeadService {
         lead.setLinkedinUrl(request.getLinkedinUrl());
         lead.setProfilePictureUrl(request.getProfilePictureUrl());
         
+        if (request.getRecordType() != null) {
+            lead.setRecordType(request.getRecordType());
+        }
+        
         // Detailed fields
         lead.setCity(request.getCity());
         lead.setState(request.getState());
@@ -138,6 +142,12 @@ public class LeadService {
             
             if (criteria.getCategoryId() != null) {
                 predicates.add(cb.equal(root.join("categories", JoinType.LEFT).get("id"), criteria.getCategoryId()));
+            }
+
+            if (criteria.getRecordType() != null) {
+                predicates.add(cb.equal(root.get("recordType"), criteria.getRecordType()));
+            } else {
+                predicates.add(cb.equal(root.get("recordType"), "LEAD"));
             }
 
             if (criteria.getExcludeCategoryId() != null) {
@@ -253,6 +263,7 @@ public class LeadService {
         res.setLastName(lead.getLastName());
         res.setHeadline(lead.getHeadline());
         res.setSummary(lead.getSummary());
+        res.setRecordType(lead.getRecordType());
         res.setCity(lead.getCity());
         res.setState(lead.getState());
         res.setCountry(lead.getCountry());

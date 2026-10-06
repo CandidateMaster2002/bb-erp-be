@@ -7,6 +7,7 @@ import java.util.List;
 public class CategoryGroupResponse {
     private Long id;
     private String name;
+    private String categoryType;
     private List<CategoryValueResponse> values;
 
     @Data

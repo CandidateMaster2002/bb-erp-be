@@ -34,6 +34,9 @@ public class Lead {
     private String headline;
     
     private String summary;
+
+    @Column(name = "record_type", nullable = false)
+    private String recordType = "LEAD";
     
     private String city;
     

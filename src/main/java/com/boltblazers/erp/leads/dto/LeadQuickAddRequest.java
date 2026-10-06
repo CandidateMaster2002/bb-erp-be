@@ -12,6 +12,7 @@ public class LeadQuickAddRequest {
     private String phone;
     private String personalEmail;
     private String notes;
+    private String recordType = "LEAD";
 
     private List<Long> categoryIds;
     private String priority;
