@@ -7,6 +7,7 @@ import java.time.Instant;
 public class LeadSearchCriteria {
     private String q;
     private Long categoryId;
+    private Long excludeCategoryId;
     private Long tagId;
     private String priority;
     private String source;

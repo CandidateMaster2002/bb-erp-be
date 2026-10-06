@@ -139,6 +139,14 @@ public class LeadService {
             if (criteria.getCategoryId() != null) {
                 predicates.add(cb.equal(root.join("categories", JoinType.LEFT).get("id"), criteria.getCategoryId()));
             }
+
+            if (criteria.getExcludeCategoryId() != null) {
+                jakarta.persistence.criteria.Subquery<Long> excludeSub = query.subquery(Long.class);
+                jakarta.persistence.criteria.Root<Lead> subRoot = excludeSub.from(Lead.class);
+                excludeSub.select(subRoot.get("id"));
+                excludeSub.where(cb.equal(subRoot.join("categories").get("id"), criteria.getExcludeCategoryId()));
+                predicates.add(cb.not(root.get("id").in(excludeSub)));
+            }
             
             if (Boolean.TRUE.equals(criteria.getHasMobileNo())) {
                 jakarta.persistence.criteria.Subquery<Long> sub = query.subquery(Long.class);
