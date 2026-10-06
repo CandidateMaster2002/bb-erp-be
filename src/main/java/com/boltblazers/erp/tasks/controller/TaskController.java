@@ -27,6 +27,11 @@ public class TaskController {
         return ResponseEntity.ok(taskService.addTask(request));
     }
 
+    @PostMapping("/recurring")
+    public ResponseEntity<List<TaskResponse>> addRecurringTasks(@Valid @RequestBody com.boltblazers.erp.tasks.dto.TaskRecurringRequest request) {
+        return ResponseEntity.ok(taskService.createRecurringTasks(request));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id, @RequestBody TaskRequest request) {
         return ResponseEntity.ok(taskService.updateTask(id, request));
@@ -35,6 +40,12 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/recurring/{groupId}")
+    public ResponseEntity<Void> deleteRecurringGroup(@PathVariable String groupId) {
+        taskService.deleteRecurringGroup(groupId);
         return ResponseEntity.noContent().build();
     }
 

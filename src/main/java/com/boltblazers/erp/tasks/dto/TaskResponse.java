@@ -9,6 +9,7 @@ public class TaskResponse {
     private String description;
     private String deadline;
     private String status;
+    private String recurrenceGroupId;
     private String createdAt;
     private String updatedAt;
 }

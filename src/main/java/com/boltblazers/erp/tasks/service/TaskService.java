@@ -50,6 +50,40 @@ public class TaskService {
         return toResponse(task);
     }
 
+    public List<TaskResponse> createRecurringTasks(com.boltblazers.erp.tasks.dto.TaskRecurringRequest request) {
+        String groupId = java.util.UUID.randomUUID().toString();
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusYears(1);
+        if (request.getEndDate() != null && !request.getEndDate().isBlank()) {
+            endDate = LocalDate.parse(request.getEndDate());
+        }
+        
+        java.time.LocalTime time = java.time.LocalTime.of(0, 0);
+        if (request.getTimeOfDay() != null && !request.getTimeOfDay().isBlank()) {
+            time = java.time.LocalTime.parse(request.getTimeOfDay());
+        }
+
+        List<String> days = request.getDaysOfWeek().stream().map(String::toUpperCase).collect(Collectors.toList());
+        boolean allDays = days.contains("ALL");
+
+        List<Task> tasksToSave = new java.util.ArrayList<>();
+        
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            if (allDays || days.contains(date.getDayOfWeek().name())) {
+                Task task = new Task();
+                task.setTitle(request.getTitle());
+                task.setDescription(request.getDescription());
+                task.setDeadline(date.atTime(time).atZone(ZoneId.of("UTC")).toInstant());
+                task.setStatus(ActionStatus.PENDING);
+                task.setRecurrenceGroupId(groupId);
+                tasksToSave.add(task);
+            }
+        }
+        
+        taskRepository.saveAll(tasksToSave);
+        return tasksToSave.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
     public TaskResponse updateTask(Long taskId, TaskRequest request) {
         Task task = taskRepository.findById(taskId).orElseThrow();
         if (request.getTitle() != null) task.setTitle(request.getTitle());
@@ -61,6 +95,13 @@ public class TaskService {
 
     public void deleteTask(Long taskId) {
         taskRepository.deleteById(taskId);
+    }
+
+    public void deleteRecurringGroup(String groupId) {
+        List<Task> tasks = taskRepository.findAll().stream()
+            .filter(t -> groupId.equals(t.getRecurrenceGroupId()))
+            .collect(Collectors.toList());
+        taskRepository.deleteAll(tasks);
     }
 
     public TaskResponse markCompleted(Long taskId) {
@@ -110,6 +151,7 @@ public class TaskService {
         res.setDescription(task.getDescription());
         if (task.getDeadline() != null) res.setDeadline(task.getDeadline().toString());
         res.setStatus(task.getStatus().name());
+        res.setRecurrenceGroupId(task.getRecurrenceGroupId());
         if (task.getCreatedAt() != null) res.setCreatedAt(task.getCreatedAt().toString());
         if (task.getUpdatedAt() != null) res.setUpdatedAt(task.getUpdatedAt().toString());
         return res;

@@ -30,6 +30,9 @@ public class Task {
     @Column(nullable = false)
     private ActionStatus status = ActionStatus.PENDING;
 
+    @Column(name = "recurrence_group_id")
+    private String recurrenceGroupId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
