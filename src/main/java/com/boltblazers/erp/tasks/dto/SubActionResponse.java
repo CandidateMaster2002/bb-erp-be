@@ -3,14 +3,13 @@ package com.boltblazers.erp.tasks.dto;
 import lombok.Data;
 
 @Data
-public class TaskResponse {
+public class SubActionResponse {
     private Long id;
+    private Long taskId;
     private String title;
     private String description;
-    private String deadline;
+    private String dueDate;
     private String status;
-    private String recurrenceGroupId;
     private String createdAt;
     private String updatedAt;
-    private java.util.List<SubActionResponse> subactions;
 }

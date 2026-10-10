@@ -19,9 +19,11 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final com.boltblazers.erp.tasks.SubActionRepository subActionRepository;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, com.boltblazers.erp.tasks.SubActionRepository subActionRepository) {
         this.taskRepository = taskRepository;
+        this.subActionRepository = subActionRepository;
     }
 
     private Instant parseDate(String dateStr) {
@@ -144,6 +146,39 @@ public class TaskService {
                 .stream().map(this::toResponse).collect(Collectors.toList());
     }
 
+    public TaskResponse getTask(Long taskId) {
+        return toResponse(taskRepository.findById(taskId).orElseThrow());
+    }
+
+    public com.boltblazers.erp.tasks.dto.SubActionResponse addSubAction(Long taskId, com.boltblazers.erp.tasks.dto.SubActionRequest req) {
+        Task task = taskRepository.findById(taskId).orElseThrow();
+        com.boltblazers.erp.tasks.SubAction sa = new com.boltblazers.erp.tasks.SubAction();
+        sa.setTask(task);
+        sa.setTitle(req.getTitle());
+        sa.setDescription(req.getDescription());
+        sa.setDueDate(parseDate(req.getDueDate()));
+        sa.setStatus(com.boltblazers.erp.tasks.SubActionStatus.PENDING);
+        return toSubActionResponse(subActionRepository.save(sa));
+    }
+
+    public com.boltblazers.erp.tasks.dto.SubActionResponse updateSubAction(Long saId, com.boltblazers.erp.tasks.dto.SubActionRequest req) {
+        com.boltblazers.erp.tasks.SubAction sa = subActionRepository.findById(saId).orElseThrow();
+        if (req.getTitle() != null) sa.setTitle(req.getTitle());
+        if (req.getDescription() != null) sa.setDescription(req.getDescription());
+        if (req.getDueDate() != null) sa.setDueDate(parseDate(req.getDueDate()));
+        return toSubActionResponse(subActionRepository.save(sa));
+    }
+
+    public com.boltblazers.erp.tasks.dto.SubActionResponse changeSubActionStatus(Long saId, String statusStr) {
+        com.boltblazers.erp.tasks.SubAction sa = subActionRepository.findById(saId).orElseThrow();
+        sa.setStatus(com.boltblazers.erp.tasks.SubActionStatus.valueOf(statusStr.toUpperCase()));
+        return toSubActionResponse(subActionRepository.save(sa));
+    }
+
+    public void deleteSubAction(Long saId) {
+        subActionRepository.deleteById(saId);
+    }
+
     private TaskResponse toResponse(Task task) {
         TaskResponse res = new TaskResponse();
         res.setId(task.getId());
@@ -154,6 +189,24 @@ public class TaskService {
         res.setRecurrenceGroupId(task.getRecurrenceGroupId());
         if (task.getCreatedAt() != null) res.setCreatedAt(task.getCreatedAt().toString());
         if (task.getUpdatedAt() != null) res.setUpdatedAt(task.getUpdatedAt().toString());
+
+        List<com.boltblazers.erp.tasks.dto.SubActionResponse> subs = subActionRepository.findByTask(task)
+            .stream().map(this::toSubActionResponse).collect(Collectors.toList());
+        res.setSubactions(subs);
+
         return res;
+    }
+
+    private com.boltblazers.erp.tasks.dto.SubActionResponse toSubActionResponse(com.boltblazers.erp.tasks.SubAction sa) {
+        com.boltblazers.erp.tasks.dto.SubActionResponse r = new com.boltblazers.erp.tasks.dto.SubActionResponse();
+        r.setId(sa.getId());
+        r.setTaskId(sa.getTask().getId());
+        r.setTitle(sa.getTitle());
+        r.setDescription(sa.getDescription());
+        if (sa.getDueDate() != null) r.setDueDate(sa.getDueDate().toString());
+        r.setStatus(sa.getStatus().name());
+        if (sa.getCreatedAt() != null) r.setCreatedAt(sa.getCreatedAt().toString());
+        if (sa.getUpdatedAt() != null) r.setUpdatedAt(sa.getUpdatedAt().toString());
+        return r;
     }
 }

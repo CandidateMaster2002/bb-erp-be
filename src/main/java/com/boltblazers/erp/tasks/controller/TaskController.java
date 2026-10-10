@@ -59,6 +59,35 @@ public class TaskController {
         return ResponseEntity.ok(taskService.markCancelled(id));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TaskResponse> getTask(@PathVariable Long id) {
+        return ResponseEntity.ok(taskService.getTask(id));
+    }
+
+    @PostMapping("/{id}/subactions")
+    public ResponseEntity<com.boltblazers.erp.tasks.dto.SubActionResponse> addSubAction(
+            @PathVariable Long id, @Valid @RequestBody com.boltblazers.erp.tasks.dto.SubActionRequest request) {
+        return ResponseEntity.ok(taskService.addSubAction(id, request));
+    }
+
+    @PutMapping("/subactions/{subId}")
+    public ResponseEntity<com.boltblazers.erp.tasks.dto.SubActionResponse> updateSubAction(
+            @PathVariable Long subId, @RequestBody com.boltblazers.erp.tasks.dto.SubActionRequest request) {
+        return ResponseEntity.ok(taskService.updateSubAction(subId, request));
+    }
+
+    @PatchMapping("/subactions/{subId}/status")
+    public ResponseEntity<com.boltblazers.erp.tasks.dto.SubActionResponse> changeSubActionStatus(
+            @PathVariable Long subId, @RequestParam String status) {
+        return ResponseEntity.ok(taskService.changeSubActionStatus(subId, status));
+    }
+
+    @DeleteMapping("/subactions/{subId}")
+    public ResponseEntity<Void> deleteSubAction(@PathVariable Long subId) {
+        taskService.deleteSubAction(subId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/today")
     public ResponseEntity<List<TaskResponse>> getTodayTasks() {
         return ResponseEntity.ok(taskService.getOverdueAndTodayActions());
