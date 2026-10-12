@@ -18,10 +18,12 @@ public class LeadLogService {
 
     private final LeadLogRepository logRepository;
     private final LeadRepository leadRepository;
+    private final LeadContactRepository contactRepository;
 
-    public LeadLogService(LeadLogRepository logRepository, LeadRepository leadRepository) {
+    public LeadLogService(LeadLogRepository logRepository, LeadRepository leadRepository, LeadContactRepository contactRepository) {
         this.logRepository = logRepository;
         this.leadRepository = leadRepository;
+        this.contactRepository = contactRepository;
     }
 
     // ========== Per-Lead Operations ==========
@@ -119,8 +121,18 @@ public class LeadLogService {
     private LeadLogResponse toResponse(LeadLog log) {
         LeadLogResponse res = new LeadLogResponse();
         res.setId(log.getId());
-        res.setLeadId(log.getLead().getId());
-        res.setLeadName(log.getLead().getFullName());
+        if (log.getLead() != null) {
+            res.setLeadId(log.getLead().getId());
+            res.setLeadName(log.getLead().getFullName());
+            res.setLinkedinUrl(log.getLead().getLinkedinUrl());
+            List<LeadContact> contacts = contactRepository.findByLead(log.getLead());
+            if (contacts != null) {
+                contacts.stream()
+                        .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
+                        .findFirst()
+                        .ifPresent(c -> res.setMobileNumber(c.getValue()));
+            }
+        }
         res.setComment(log.getComment());
         res.setNextAction(log.getNextAction());
         res.setActionStatus(log.getActionStatus() != null ? log.getActionStatus().name() : null);

@@ -7,6 +7,8 @@ public class LeadLogResponse {
     private Long id;
     private Long leadId;
     private String leadName;
+    private String mobileNumber;
+    private String linkedinUrl;
     private String comment;
     private String nextAction;
     private String nextActionDate;
