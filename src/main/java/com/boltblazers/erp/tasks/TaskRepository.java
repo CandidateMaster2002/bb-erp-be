@@ -15,4 +15,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByStatusAndDeadlineGreaterThanEqualAndDeadlineLessThanOrderByDeadlineAsc(ActionStatus status, Instant start, Instant end);
 
     List<Task> findByStatusAndDeadlineLessThanOrderByDeadlineAsc(ActionStatus status, Instant end);
+
+    List<Task> findByTimeHorizonOrderByCreatedAtDesc(String timeHorizon);
+
+    List<Task> findByStatusAndTimeHorizonOrderByCreatedAtDesc(ActionStatus status, String timeHorizon);
 }

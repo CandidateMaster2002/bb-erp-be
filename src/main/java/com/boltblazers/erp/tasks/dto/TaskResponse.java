@@ -10,6 +10,7 @@ public class TaskResponse {
     private String deadline;
     private String status;
     private String recurrenceGroupId;
+    private String timeHorizon;
     private String createdAt;
     private String updatedAt;
     private java.util.List<SubActionResponse> subactions;

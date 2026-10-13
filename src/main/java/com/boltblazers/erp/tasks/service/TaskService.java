@@ -48,6 +48,13 @@ public class TaskService {
         task.setDescription(request.getDescription());
         task.setDeadline(parseDate(request.getDeadline()));
         task.setStatus(ActionStatus.PENDING);
+        if (request.getTimeHorizon() != null && !request.getTimeHorizon().isBlank()) {
+            task.setTimeHorizon(request.getTimeHorizon().toUpperCase());
+        } else if (task.getDeadline() != null) {
+            task.setTimeHorizon("TODAY");
+        } else {
+            task.setTimeHorizon("SOMEDAY");
+        }
         taskRepository.save(task);
         return toResponse(task);
     }
@@ -91,6 +98,28 @@ public class TaskService {
         if (request.getTitle() != null) task.setTitle(request.getTitle());
         if (request.getDescription() != null) task.setDescription(request.getDescription());
         if (request.getDeadline() != null) task.setDeadline(parseDate(request.getDeadline()));
+        if (request.getTimeHorizon() != null) task.setTimeHorizon(request.getTimeHorizon().toUpperCase());
+        taskRepository.save(task);
+        return toResponse(task);
+    }
+
+    public List<TaskResponse> getTasksByHorizon(String horizon) {
+        return taskRepository.findByStatusAndTimeHorizonOrderByCreatedAtDesc(ActionStatus.PENDING, horizon.toUpperCase())
+                .stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    public TaskResponse updateTaskHorizon(Long taskId, String horizon, String deadlineStr) {
+        Task task = taskRepository.findById(taskId).orElseThrow();
+        if (horizon != null && !horizon.isBlank()) {
+            task.setTimeHorizon(horizon.toUpperCase());
+        }
+        if (deadlineStr != null) {
+            if (deadlineStr.isBlank()) {
+                task.setDeadline(null);
+            } else {
+                task.setDeadline(parseDate(deadlineStr));
+            }
+        }
         taskRepository.save(task);
         return toResponse(task);
     }
@@ -187,6 +216,7 @@ public class TaskService {
         if (task.getDeadline() != null) res.setDeadline(task.getDeadline().toString());
         res.setStatus(task.getStatus().name());
         res.setRecurrenceGroupId(task.getRecurrenceGroupId());
+        res.setTimeHorizon(task.getTimeHorizon());
         if (task.getCreatedAt() != null) res.setCreatedAt(task.getCreatedAt().toString());
         if (task.getUpdatedAt() != null) res.setUpdatedAt(task.getUpdatedAt().toString());
 

@@ -110,4 +110,17 @@ public class TaskController {
     public ResponseEntity<List<TaskResponse>> getTasksByStatus(@PathVariable ActionStatus status) {
         return ResponseEntity.ok(taskService.getByStatus(status));
     }
+
+    @GetMapping("/horizon/{horizon}")
+    public ResponseEntity<List<TaskResponse>> getTasksByHorizon(@PathVariable String horizon) {
+        return ResponseEntity.ok(taskService.getTasksByHorizon(horizon));
+    }
+
+    @PatchMapping("/{id}/horizon")
+    public ResponseEntity<TaskResponse> updateTaskHorizon(
+            @PathVariable Long id,
+            @RequestParam String horizon,
+            @RequestParam(required = false) String deadline) {
+        return ResponseEntity.ok(taskService.updateTaskHorizon(id, horizon, deadline));
+    }
 }

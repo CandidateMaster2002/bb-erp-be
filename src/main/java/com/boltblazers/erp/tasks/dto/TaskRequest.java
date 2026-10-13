@@ -9,4 +9,5 @@ public class TaskRequest {
     private String title;
     private String description;
     private String deadline;
+    private String timeHorizon; // TODAY, THIS_WEEK, THIS_MONTH, SOMEDAY
 }

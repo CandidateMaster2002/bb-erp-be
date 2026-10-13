@@ -33,6 +33,9 @@ public class Task {
     @Column(name = "recurrence_group_id")
     private String recurrenceGroupId;
 
+    @Column(name = "time_horizon")
+    private String timeHorizon = "TODAY";
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
