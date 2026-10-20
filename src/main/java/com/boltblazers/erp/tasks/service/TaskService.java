@@ -85,6 +85,7 @@ public class TaskService {
                 task.setDeadline(date.atTime(time).atZone(ZoneId.of("UTC")).toInstant());
                 task.setStatus(ActionStatus.PENDING);
                 task.setRecurrenceGroupId(groupId);
+                task.setTimeHorizon("RECURRING");
                 tasksToSave.add(task);
             }
         }
@@ -103,9 +104,52 @@ public class TaskService {
         return toResponse(task);
     }
 
+    public boolean isRecurringAllowed(Task task) {
+        if (task.getRecurrenceGroupId() == null || task.getRecurrenceGroupId().isBlank()) {
+            return true;
+        }
+        if (task.getDeadline() == null) {
+            return false;
+        }
+
+        ZoneId istZone = ZoneId.of("Asia/Kolkata");
+        LocalDate todayIst = LocalDate.now(istZone);
+        LocalDate yesterdayIst = todayIst.minusDays(1);
+        LocalDate taskDateIst = task.getDeadline().atZone(istZone).toLocalDate();
+
+        ZoneId utcZone = ZoneId.of("UTC");
+        LocalDate todayUtc = LocalDate.now(utcZone);
+        LocalDate yesterdayUtc = todayUtc.minusDays(1);
+        LocalDate taskDateUtc = task.getDeadline().atZone(utcZone).toLocalDate();
+
+        boolean matchIst = taskDateIst.equals(todayIst) || taskDateIst.equals(yesterdayIst);
+        boolean matchUtc = taskDateUtc.equals(todayUtc) || taskDateUtc.equals(yesterdayUtc);
+
+        return matchIst || matchUtc;
+    }
+
     public List<TaskResponse> getTasksByHorizon(String horizon) {
-        return taskRepository.findByStatusAndTimeHorizonOrderByCreatedAtDesc(ActionStatus.PENDING, horizon.toUpperCase())
-                .stream().map(this::toResponse).collect(Collectors.toList());
+        if ("TODAY".equalsIgnoreCase(horizon)) {
+            List<TaskResponse> responses = new java.util.ArrayList<>();
+
+            taskRepository.findByStatusAndTimeHorizonOrderByCreatedAtDesc(ActionStatus.PENDING, "TODAY").stream()
+                    .filter(t -> t.getRecurrenceGroupId() == null || t.getRecurrenceGroupId().isBlank())
+                    .map(this::toResponse)
+                    .forEach(responses::add);
+
+            taskRepository.findByStatusOrderByDeadlineAsc(ActionStatus.PENDING).stream()
+                    .filter(t -> t.getRecurrenceGroupId() != null && !t.getRecurrenceGroupId().isBlank())
+                    .filter(this::isRecurringAllowed)
+                    .map(this::toResponse)
+                    .forEach(responses::add);
+
+            return responses;
+        } else {
+            return taskRepository.findByStatusAndTimeHorizonOrderByCreatedAtDesc(ActionStatus.PENDING, horizon.toUpperCase()).stream()
+                    .filter(t -> t.getRecurrenceGroupId() == null || t.getRecurrenceGroupId().isBlank())
+                    .map(this::toResponse)
+                    .collect(Collectors.toList());
+        }
     }
 
     public TaskResponse updateTaskHorizon(Long taskId, String horizon, String deadlineStr) {
@@ -153,26 +197,34 @@ public class TaskService {
         Instant start = date.atStartOfDay(ZoneId.of("UTC")).toInstant();
         Instant end = date.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
         return taskRepository.findByStatusAndDeadlineGreaterThanEqualAndDeadlineLessThanOrderByDeadlineAsc(ActionStatus.PENDING, start, end)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream()
+                .filter(this::isRecurringAllowed)
+                .map(this::toResponse).collect(Collectors.toList());
     }
 
     public List<TaskResponse> getOverdueAndTodayActions() {
-        LocalDate today = LocalDate.now();
-        Instant end = today.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
-        return taskRepository.findByStatusAndDeadlineLessThanOrderByDeadlineAsc(ActionStatus.PENDING, end)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+        Instant end = today.plusDays(1).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant();
+        return taskRepository.findByStatusAndDeadlineLessThanOrderByDeadlineAsc(ActionStatus.PENDING, end).stream()
+                .filter(this::isRecurringAllowed)
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public List<TaskResponse> getActionsBetween(LocalDate from, LocalDate to) {
         Instant start = from.atStartOfDay(ZoneId.of("UTC")).toInstant();
         Instant end = to.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
         return taskRepository.findByStatusAndDeadlineGreaterThanEqualAndDeadlineLessThanOrderByDeadlineAsc(ActionStatus.PENDING, start, end)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream()
+                .filter(this::isRecurringAllowed)
+                .map(this::toResponse).collect(Collectors.toList());
     }
     
     public List<TaskResponse> getByStatus(ActionStatus status) {
-        return taskRepository.findByStatusOrderByDeadlineAsc(status)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+        return taskRepository.findByStatusOrderByDeadlineAsc(status).stream()
+                .filter(this::isRecurringAllowed)
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public TaskResponse getTask(Long taskId) {
@@ -216,7 +268,26 @@ public class TaskService {
         if (task.getDeadline() != null) res.setDeadline(task.getDeadline().toString());
         res.setStatus(task.getStatus().name());
         res.setRecurrenceGroupId(task.getRecurrenceGroupId());
-        res.setTimeHorizon(task.getTimeHorizon());
+
+        if (task.getRecurrenceGroupId() != null && !task.getRecurrenceGroupId().isBlank()) {
+            if (task.getDeadline() != null) {
+                ZoneId istZone = ZoneId.of("Asia/Kolkata");
+                LocalDate taskDate = task.getDeadline().atZone(istZone).toLocalDate();
+                LocalDate today = LocalDate.now(istZone);
+                if (taskDate.equals(today)) {
+                    res.setTimeHorizon("Today");
+                } else if (taskDate.equals(today.minusDays(1))) {
+                    res.setTimeHorizon("Yesterday");
+                } else {
+                    res.setTimeHorizon("Recurring");
+                }
+            } else {
+                res.setTimeHorizon("Recurring");
+            }
+        } else {
+            res.setTimeHorizon(task.getTimeHorizon());
+        }
+
         if (task.getCreatedAt() != null) res.setCreatedAt(task.getCreatedAt().toString());
         if (task.getUpdatedAt() != null) res.setUpdatedAt(task.getUpdatedAt().toString());
 
