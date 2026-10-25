@@ -2,11 +2,13 @@ package com.boltblazers.erp.leads.service;
 
 import com.boltblazers.erp.leads.Tag;
 import com.boltblazers.erp.leads.TagRepository;
+import com.boltblazers.erp.leads.dto.TagResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -18,8 +20,19 @@ public class TagService {
         this.tagRepository = tagRepository;
     }
 
-    public List<Tag> getAllTags() {
-        return tagRepository.findAllByOrderByNameAsc();
+    public List<TagResponse> getAllTags() {
+        return tagRepository.findAllWithCount().stream()
+                .map(tc -> new TagResponse(tc.getId(), tc.getName(), tc.getLeadCount()))
+                .collect(Collectors.toList());
+    }
+
+    public TagResponse getTagById(Long id) {
+        Tag tag = tagRepository.findById(id).orElseThrow();
+        Long count = tagRepository.findAllWithCount().stream()
+                .filter(tc -> tc.getId().equals(id))
+                .map(TagRepository.TagWithCount::getLeadCount)
+                .findFirst().orElse(0L);
+        return new TagResponse(tag.getId(), tag.getName(), count);
     }
 
     public Tag getOrCreateTag(String name) {
@@ -35,8 +48,19 @@ public class TagService {
                 });
     }
 
-    public Tag createTag(String name) {
-        return getOrCreateTag(name);
+    public TagResponse createTag(String name) {
+        Tag tag = getOrCreateTag(name);
+        return new TagResponse(tag.getId(), tag.getName(), 0L);
+    }
+
+    public TagResponse updateTag(Long id, String newName) {
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tag name cannot be empty");
+        }
+        Tag tag = tagRepository.findById(id).orElseThrow();
+        tag.setName(newName.trim());
+        tagRepository.save(tag);
+        return getTagById(id);
     }
 
     public void deleteTag(Long id) {

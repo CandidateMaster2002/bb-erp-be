@@ -1,6 +1,6 @@
 package com.boltblazers.erp.leads.controller;
 
-import com.boltblazers.erp.leads.Tag;
+import com.boltblazers.erp.leads.dto.TagResponse;
 import com.boltblazers.erp.leads.service.TagService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +19,25 @@ public class TagController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Tag>> getAllTags() {
+    public ResponseEntity<List<TagResponse>> getAllTags() {
         return ResponseEntity.ok(tagService.getAllTags());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TagResponse> getTagById(@PathVariable Long id) {
+        return ResponseEntity.ok(tagService.getTagById(id));
+    }
+
     @PostMapping
-    public ResponseEntity<Tag> createTag(@RequestBody Map<String, String> request) {
+    public ResponseEntity<TagResponse> createTag(@RequestBody Map<String, String> request) {
         String name = request.get("name");
-        return ResponseEntity.ok(tagService.getOrCreateTag(name));
+        return ResponseEntity.ok(tagService.createTag(name));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TagResponse> updateTag(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String name = request.get("name");
+        return ResponseEntity.ok(tagService.updateTag(id, name));
     }
 
     @DeleteMapping("/{id}")
