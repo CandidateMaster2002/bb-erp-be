@@ -183,12 +183,39 @@ public class LeadService {
                 jakarta.persistence.criteria.Root<LeadContact> subRoot = sub.from(LeadContact.class);
                 sub.select(subRoot.get("lead").get("id"));
                 sub.where(
-                    cb.or(
-                        cb.equal(subRoot.get("type"), ContactType.MOBILE),
-                        cb.equal(subRoot.get("type"), ContactType.ASSUMED_MOBILE)
+                    cb.and(
+                        cb.or(
+                            cb.equal(subRoot.get("type"), ContactType.MOBILE),
+                            cb.equal(subRoot.get("type"), ContactType.ASSUMED_MOBILE),
+                            cb.equal(subRoot.get("type"), ContactType.WHATSAPP)
+                        ),
+                        cb.isNotNull(subRoot.get("value")),
+                        cb.notEqual(cb.trim(subRoot.get("value")), ""),
+                        cb.notEqual(cb.trim(subRoot.get("value")), "-"),
+                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "null"),
+                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "n/a")
                     )
                 );
                 predicates.add(root.get("id").in(sub));
+            } else if (Boolean.FALSE.equals(criteria.getHasMobileNo())) {
+                jakarta.persistence.criteria.Subquery<Long> sub = query.subquery(Long.class);
+                jakarta.persistence.criteria.Root<LeadContact> subRoot = sub.from(LeadContact.class);
+                sub.select(subRoot.get("lead").get("id"));
+                sub.where(
+                    cb.and(
+                        cb.or(
+                            cb.equal(subRoot.get("type"), ContactType.MOBILE),
+                            cb.equal(subRoot.get("type"), ContactType.ASSUMED_MOBILE),
+                            cb.equal(subRoot.get("type"), ContactType.WHATSAPP)
+                        ),
+                        cb.isNotNull(subRoot.get("value")),
+                        cb.notEqual(cb.trim(subRoot.get("value")), ""),
+                        cb.notEqual(cb.trim(subRoot.get("value")), "-"),
+                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "null"),
+                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "n/a")
+                    )
+                );
+                predicates.add(cb.not(root.get("id").in(sub)));
             }
 
             if (criteria.getPriority() != null) {
@@ -343,7 +370,12 @@ public class LeadService {
         List<LeadContact> contacts = contactRepository.findByLead(lead);
         if (contacts != null) {
             contacts.stream()
-                .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
+                .filter(c -> (c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE || c.getType() == ContactType.WHATSAPP)
+                             && c.getValue() != null 
+                             && !c.getValue().trim().isEmpty() 
+                             && !"-".equals(c.getValue().trim()) 
+                             && !"null".equalsIgnoreCase(c.getValue().trim())
+                             && !"n/a".equalsIgnoreCase(c.getValue().trim()))
                 .findFirst()
                 .ifPresent(c -> res.setMobileNumber(c.getValue()));
 
