@@ -194,7 +194,11 @@ public class LeadService {
                         cb.notEqual(cb.trim(subRoot.get("value")), ""),
                         cb.notEqual(cb.trim(subRoot.get("value")), "-"),
                         cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "null"),
-                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "n/a")
+                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "n/a"),
+                        cb.greaterThanOrEqualTo(
+                            cb.length(cb.function("regexp_replace", String.class, subRoot.get("value"), cb.literal("[^0-9]"), cb.literal(""), cb.literal("g"))),
+                            5
+                        )
                     )
                 );
                 predicates.add(root.get("id").in(sub));
@@ -213,7 +217,11 @@ public class LeadService {
                         cb.notEqual(cb.trim(subRoot.get("value")), ""),
                         cb.notEqual(cb.trim(subRoot.get("value")), "-"),
                         cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "null"),
-                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "n/a")
+                        cb.notEqual(cb.lower(cb.trim(subRoot.get("value"))), "n/a"),
+                        cb.greaterThanOrEqualTo(
+                            cb.length(cb.function("regexp_replace", String.class, subRoot.get("value"), cb.literal("[^0-9]"), cb.literal(""), cb.literal("g"))),
+                            5
+                        )
                     )
                 );
                 predicates.add(cb.not(root.get("id").in(sub)));
@@ -307,18 +315,23 @@ public class LeadService {
         if (request.getMobileNumber() != null) {
             String normalizedMobile = normalizePhone(request.getMobileNumber());
             List<LeadContact> contacts = contactRepository.findByLead(lead);
-            LeadContact mobile = contacts.stream()
-                .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
-                .findFirst()
-                .orElseGet(() -> {
+            Optional<LeadContact> existingMobile = contacts.stream()
+                .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE || c.getType() == ContactType.WHATSAPP)
+                .findFirst();
+
+            if (normalizedMobile == null || normalizedMobile.trim().isEmpty() || "-".equals(normalizedMobile.trim())) {
+                existingMobile.ifPresent(contactRepository::delete);
+            } else {
+                LeadContact mobile = existingMobile.orElseGet(() -> {
                     LeadContact c = new LeadContact();
                     c.setLead(lead);
                     c.setType(ContactType.MOBILE);
                     c.setIsPrimary(true);
                     return c;
                 });
-            mobile.setValue(normalizedMobile);
-            contactRepository.save(mobile);
+                mobile.setValue(normalizedMobile.trim());
+                contactRepository.save(mobile);
+            }
         }
 
         if (request.getPersonalEmail() != null) {
