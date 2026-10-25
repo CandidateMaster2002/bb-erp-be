@@ -36,9 +36,10 @@ public class LeadService {
     }
 
     public LeadResponse quickAdd(LeadQuickAddRequest request) {
-        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
+        String normalizedPhone = normalizePhone(request.getPhone());
+        if (normalizedPhone != null && !normalizedPhone.trim().isEmpty()) {
             // Check for duplicate phone
-            Optional<LeadContact> existingContact = contactRepository.findByValue(request.getPhone());
+            Optional<LeadContact> existingContact = contactRepository.findByValue(normalizedPhone);
             if (existingContact.isPresent()) {
                 Lead existing = existingContact.get().getLead();
                 throw new LeadConflictException(existing.getId(), existing.getFullName());
@@ -97,11 +98,11 @@ public class LeadService {
 
         leadRepository.save(lead);
 
-        if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
+        if (normalizedPhone != null && !normalizedPhone.trim().isEmpty()) {
             LeadContact contact = new LeadContact();
             contact.setLead(lead);
             contact.setType(ContactType.MOBILE);
-            contact.setValue(request.getPhone());
+            contact.setValue(normalizedPhone);
             contact.setIsPrimary(true);
             contactRepository.save(contact);
         }
@@ -304,6 +305,7 @@ public class LeadService {
         leadRepository.save(lead);
         
         if (request.getMobileNumber() != null) {
+            String normalizedMobile = normalizePhone(request.getMobileNumber());
             List<LeadContact> contacts = contactRepository.findByLead(lead);
             LeadContact mobile = contacts.stream()
                 .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
@@ -315,7 +317,7 @@ public class LeadService {
                     c.setIsPrimary(true);
                     return c;
                 });
-            mobile.setValue(request.getMobileNumber());
+            mobile.setValue(normalizedMobile);
             contactRepository.save(mobile);
         }
 
@@ -429,5 +431,75 @@ public class LeadService {
 
         return res;
     }
-}
 
+    public static String normalizePhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return phone;
+        }
+        String trimmed = phone.trim();
+        String[] parts = trimmed.split("[,;]\\s*");
+        if (parts.length > 1) {
+            java.util.List<String> normalizedList = new java.util.ArrayList<>();
+            for (String p : parts) {
+                if (!p.trim().isEmpty()) {
+                    normalizedList.add(normalizeSinglePhone(p));
+                }
+            }
+            return String.join(", ", normalizedList);
+        }
+        return normalizeSinglePhone(trimmed);
+    }
+
+    private static String normalizeSinglePhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return phone;
+        }
+        String p = phone.trim();
+        String note = "";
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\s*(\\([^)]+\\))$").matcher(p);
+        if (m.find()) {
+            note = " " + m.group(1);
+            p = p.substring(0, m.start()).trim();
+        }
+
+        boolean hasPlus = p.startsWith("+");
+        String digits = p.replaceAll("\\D", "");
+        if (digits.length() < 7) {
+            return phone;
+        }
+
+        // US: 1XXXXXXXXXX (11 digits starting with 1)
+        if (digits.length() == 11 && digits.startsWith("1")) {
+            return "+" + digits + note;
+        }
+        // UK: 44XXXXXXXXXX (12 digits starting with 44)
+        if (digits.length() == 12 && digits.startsWith("44")) {
+            return "+" + digits + note;
+        }
+        // Australia: 61XXXXXXXXX (11 digits starting with 61)
+        if (digits.length() == 11 && digits.startsWith("61")) {
+            return "+" + digits + note;
+        }
+        // India: 10 digits
+        if (digits.length() == 10) {
+            return "+91" + digits + note;
+        }
+        // India with leading 0: 0XXXXXXXXXX (11 digits)
+        if (digits.length() == 11 && digits.startsWith("0")) {
+            return "+91" + digits.substring(1) + note;
+        }
+        // India: 12 digits starting with 91
+        if (digits.length() == 12 && digits.startsWith("91")) {
+            return "+" + digits + note;
+        }
+        // India: 13 digits starting with 091
+        if (digits.length() == 13 && digits.startsWith("091")) {
+            return "+" + digits.substring(1) + note;
+        }
+        if (hasPlus) {
+            return "+" + digits + note;
+        }
+        return p + note;
+    }
+
+}

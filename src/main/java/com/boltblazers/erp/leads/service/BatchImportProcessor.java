@@ -102,8 +102,8 @@ public class BatchImportProcessor {
         leadRepository.save(lead);
 
         // Contacts
-        addContact(lead, ContactType.MOBILE, mobile, isNew);
-        addContact(lead, ContactType.ASSUMED_MOBILE, row.get("assumed_mobile_no"), false);
+        addContact(lead, ContactType.MOBILE, LeadService.normalizePhone(mobile), isNew);
+        addContact(lead, ContactType.ASSUMED_MOBILE, LeadService.normalizePhone(row.get("assumed_mobile_no")), false);
         addContact(lead, ContactType.PERSONAL_EMAIL, personalEmail, false);
         addContact(lead, ContactType.WORK_EMAIL, workEmail, false);
 
