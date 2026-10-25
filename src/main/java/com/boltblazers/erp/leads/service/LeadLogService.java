@@ -52,7 +52,9 @@ public class LeadLogService {
         log.setComment(request.getComment());
         log.setNextAction(request.getNextAction());
         log.setNextActionDate(parseDate(request.getNextActionDate()));
-        log.setActionStatus(ActionStatus.PENDING);
+        boolean hasAction = (request.getNextAction() != null && !request.getNextAction().isBlank())
+                         || (request.getNextActionDate() != null && !request.getNextActionDate().isBlank());
+        log.setActionStatus(hasAction ? ActionStatus.PENDING : null);
         logRepository.save(log);
         return toResponse(log);
     }
@@ -68,6 +70,13 @@ public class LeadLogService {
         if (request.getNextAction() != null) log.setNextAction(request.getNextAction());
         if (request.getNextActionDate() != null) {
             log.setNextActionDate(parseDate(request.getNextActionDate()));
+        }
+        boolean hasAction = (log.getNextAction() != null && !log.getNextAction().isBlank())
+                         || log.getNextActionDate() != null;
+        if (!hasAction) {
+            log.setActionStatus(null);
+        } else if (log.getActionStatus() == null) {
+            log.setActionStatus(ActionStatus.PENDING);
         }
         logRepository.save(log);
         return toResponse(log);
@@ -128,14 +137,17 @@ public class LeadLogService {
             List<LeadContact> contacts = contactRepository.findByLead(log.getLead());
             if (contacts != null) {
                 contacts.stream()
-                        .filter(c -> c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE)
+                        .filter(c -> (c.getType() == ContactType.MOBILE || c.getType() == ContactType.ASSUMED_MOBILE || c.getType() == ContactType.WHATSAPP)
+                                     && c.getValue() != null && !c.getValue().trim().isEmpty() && !"-".equals(c.getValue().trim()))
                         .findFirst()
                         .ifPresent(c -> res.setMobileNumber(c.getValue()));
             }
         }
         res.setComment(log.getComment());
         res.setNextAction(log.getNextAction());
-        res.setActionStatus(log.getActionStatus() != null ? log.getActionStatus().name() : null);
+        boolean hasAction = (log.getNextAction() != null && !log.getNextAction().isBlank())
+                         || log.getNextActionDate() != null;
+        res.setActionStatus(hasAction && log.getActionStatus() != null ? log.getActionStatus().name() : null);
         if (log.getNextActionDate() != null) {
             res.setNextActionDate(log.getNextActionDate().toString());
         }

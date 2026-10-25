@@ -30,7 +30,7 @@ public class LeadLog {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "action_status")
-    private ActionStatus actionStatus = ActionStatus.PENDING;
+    private ActionStatus actionStatus;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
