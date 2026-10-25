@@ -23,4 +23,6 @@ public class LeadUpdateRequest {
     
     private String remark;
     private LeadPriority priority;
+    private java.util.List<Long> tagIds;
+    private java.util.List<String> tagNames;
 }

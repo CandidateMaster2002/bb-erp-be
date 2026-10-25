@@ -22,13 +22,17 @@ public class LeadService {
     private final LeadRepository leadRepository;
     private final LeadContactRepository contactRepository;
     private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
+    private final TagService tagService;
     private final LeadEducationRepository educationRepository;
 
-    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository, CategoryRepository categoryRepository, LeadEducationRepository educationRepository) {
+    public LeadService(LeadRepository leadRepository, LeadContactRepository contactRepository, CategoryRepository categoryRepository, LeadEducationRepository educationRepository, TagRepository tagRepository, TagService tagService) {
         this.leadRepository = leadRepository;
         this.contactRepository = contactRepository;
         this.categoryRepository = categoryRepository;
         this.educationRepository = educationRepository;
+        this.tagRepository = tagRepository;
+        this.tagService = tagService;
     }
 
     public LeadResponse quickAdd(LeadQuickAddRequest request) {
@@ -83,6 +87,12 @@ public class LeadService {
         if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
             List<Category> categories = categoryRepository.findAllById(request.getCategoryIds());
             lead.setCategories(categories);
+        }
+
+        if ((request.getTagIds() != null && !request.getTagIds().isEmpty()) ||
+            (request.getTagNames() != null && !request.getTagNames().isEmpty())) {
+            List<Tag> tags = tagService.resolveTags(request.getTagIds(), request.getTagNames());
+            lead.setTags(tags);
         }
 
         leadRepository.save(lead);
@@ -144,6 +154,16 @@ public class LeadService {
                 predicates.add(cb.equal(root.join("categories", JoinType.LEFT).get("id"), criteria.getCategoryId()));
             }
 
+            query.distinct(true);
+
+            if (criteria.getTagId() != null) {
+                predicates.add(cb.equal(root.join("tags", JoinType.LEFT).get("id"), criteria.getTagId()));
+            }
+
+            if (criteria.getTagIds() != null && !criteria.getTagIds().isEmpty()) {
+                predicates.add(root.join("tags", JoinType.LEFT).get("id").in(criteria.getTagIds()));
+            }
+
             if (criteria.getRecordType() != null) {
                 predicates.add(cb.equal(root.get("recordType"), criteria.getRecordType()));
             } else {
@@ -200,6 +220,39 @@ public class LeadService {
         return mapToResponse(lead, false);
     }
 
+    public LeadResponse updateTags(Long leadId, List<Long> tagIds) {
+        Lead lead = leadRepository.findById(leadId).orElseThrow();
+        List<Tag> tags = (tagIds != null && !tagIds.isEmpty()) ? tagRepository.findAllById(tagIds) : new ArrayList<>();
+        lead.setTags(tags);
+        leadRepository.save(lead);
+        return mapToResponse(lead, false);
+    }
+
+    public LeadResponse addTagNames(Long leadId, List<String> tagNames) {
+        Lead lead = leadRepository.findById(leadId).orElseThrow();
+        List<Tag> currentTags = new ArrayList<>(lead.getTags());
+        if (tagNames != null) {
+            for (String name : tagNames) {
+                if (name != null && !name.trim().isEmpty()) {
+                    Tag tag = tagService.getOrCreateTag(name);
+                    if (!currentTags.contains(tag)) {
+                        currentTags.add(tag);
+                    }
+                }
+            }
+        }
+        lead.setTags(currentTags);
+        leadRepository.save(lead);
+        return mapToResponse(lead, false);
+    }
+
+    public LeadResponse removeTag(Long leadId, Long tagId) {
+        Lead lead = leadRepository.findById(leadId).orElseThrow();
+        lead.getTags().removeIf(t -> t.getId().equals(tagId));
+        leadRepository.save(lead);
+        return mapToResponse(lead, false);
+    }
+
     public LeadResponse updateLead(Long leadId, com.boltblazers.erp.leads.dto.LeadUpdateRequest request) {
         Lead lead = leadRepository.findById(leadId).orElseThrow();
         
@@ -217,6 +270,9 @@ public class LeadService {
         if (request.getLinkedinUrl() != null) lead.setLinkedinUrl(request.getLinkedinUrl());
         if (request.getRemark() != null) lead.setRemark(request.getRemark());
         if (request.getPriority() != null) lead.setPriority(request.getPriority());
+        if (request.getTagIds() != null || request.getTagNames() != null) {
+            lead.setTags(tagService.resolveTags(request.getTagIds(), request.getTagNames()));
+        }
 
         leadRepository.save(lead);
         
@@ -309,6 +365,16 @@ public class LeadService {
                 LeadResponse.CategoryDto dto = new LeadResponse.CategoryDto();
                 dto.setId(cat.getId());
                 dto.setName(cat.getName());
+                return dto;
+            }).collect(java.util.stream.Collectors.toList()));
+        }
+
+        // Map tags
+        if (lead.getTags() != null && !lead.getTags().isEmpty()) {
+            res.setTags(lead.getTags().stream().map(tag -> {
+                LeadResponse.TagDto dto = new LeadResponse.TagDto();
+                dto.setId(tag.getId());
+                dto.setName(tag.getName());
                 return dto;
             }).collect(java.util.stream.Collectors.toList()));
         }

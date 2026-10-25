@@ -15,6 +15,8 @@ public class LeadQuickAddRequest {
     private String recordType = "LEAD";
 
     private List<Long> categoryIds;
+    private List<Long> tagIds;
+    private List<String> tagNames;
     private String priority;
     
     private String jobTitle;

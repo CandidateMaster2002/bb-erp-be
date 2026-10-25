@@ -50,7 +50,17 @@ public class LeadController {
     }
 
     @PutMapping("/{id}/tags")
-    public ResponseEntity<?> updateTags(@PathVariable Long id, @RequestBody java.util.List<Long> tagIds) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<LeadResponse> updateTags(@PathVariable Long id, @RequestBody java.util.List<Long> tagIds) {
+        return ResponseEntity.ok(leadService.updateTags(id, tagIds));
+    }
+
+    @PostMapping("/{id}/tags")
+    public ResponseEntity<LeadResponse> addTagNames(@PathVariable Long id, @RequestBody java.util.List<String> tagNames) {
+        return ResponseEntity.ok(leadService.addTagNames(id, tagNames));
+    }
+
+    @DeleteMapping("/{id}/tags/{tagId}")
+    public ResponseEntity<LeadResponse> removeTag(@PathVariable Long id, @PathVariable Long tagId) {
+        return ResponseEntity.ok(leadService.removeTag(id, tagId));
     }
 }

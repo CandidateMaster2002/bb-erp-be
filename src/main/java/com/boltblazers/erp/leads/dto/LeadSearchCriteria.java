@@ -9,6 +9,7 @@ public class LeadSearchCriteria {
     private Long categoryId;
     private Long excludeCategoryId;
     private Long tagId;
+    private java.util.List<Long> tagIds;
     private String priority;
     private String source;
     private String city;
