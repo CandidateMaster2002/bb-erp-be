@@ -2,6 +2,9 @@ package com.boltblazers.erp.leads;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.Instant;
 
 @Entity
 @Table(name = "lead_contacts")
@@ -25,4 +28,12 @@ public class LeadContact {
 
     @Column(name = "is_primary", nullable = false)
     private Boolean isPrimary = false;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 }

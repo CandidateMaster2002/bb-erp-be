@@ -32,6 +32,7 @@ public class LeadResponse {
     private String jobTitle;
     private String company;
     private String mobileNumber;
+    private Instant mobileUpdatedAt;
     private String linkedinUrl;
     
     // Additional nested fields for the full profile
@@ -49,6 +50,8 @@ public class LeadResponse {
         private String type;
         private String value;
         private Boolean isPrimary;
+        private Instant createdAt;
+        private Instant updatedAt;
     }
     
     @Data

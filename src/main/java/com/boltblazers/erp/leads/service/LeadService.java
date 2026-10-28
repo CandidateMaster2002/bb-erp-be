@@ -329,7 +329,10 @@ public class LeadService {
                     c.setIsPrimary(true);
                     return c;
                 });
-                mobile.setValue(normalizedMobile.trim());
+                if (!normalizedMobile.trim().equals(mobile.getValue())) {
+                    mobile.setValue(normalizedMobile.trim());
+                    mobile.setUpdatedAt(java.time.Instant.now());
+                }
                 contactRepository.save(mobile);
             }
         }
@@ -392,7 +395,10 @@ public class LeadService {
                              && !"null".equalsIgnoreCase(c.getValue().trim())
                              && !"n/a".equalsIgnoreCase(c.getValue().trim()))
                 .findFirst()
-                .ifPresent(c -> res.setMobileNumber(c.getValue()));
+                .ifPresent(c -> {
+                    res.setMobileNumber(c.getValue());
+                    res.setMobileUpdatedAt(c.getUpdatedAt() != null ? c.getUpdatedAt() : c.getCreatedAt());
+                });
 
             if (includeRelations) {
                 res.setContacts(contacts.stream().map(c -> {
@@ -401,6 +407,8 @@ public class LeadService {
                     dto.setType(c.getType().name());
                     dto.setValue(c.getValue());
                     dto.setIsPrimary(c.getIsPrimary());
+                    dto.setCreatedAt(c.getCreatedAt());
+                    dto.setUpdatedAt(c.getUpdatedAt());
                     return dto;
                 }).collect(java.util.stream.Collectors.toList()));
             }
