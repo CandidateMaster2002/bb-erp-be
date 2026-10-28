@@ -227,6 +227,27 @@ public class LeadService {
                 predicates.add(cb.not(root.get("id").in(sub)));
             }
 
+            if (Boolean.TRUE.equals(criteria.getMobileUpdatedToday())) {
+                jakarta.persistence.criteria.Subquery<Long> sub = query.subquery(Long.class);
+                jakarta.persistence.criteria.Root<LeadContact> subRoot = sub.from(LeadContact.class);
+                sub.select(subRoot.get("lead").get("id"));
+                
+                java.time.ZoneId zone = java.time.ZoneId.of("Asia/Kolkata");
+                java.time.Instant startOfToday = java.time.LocalDate.now(zone).atStartOfDay(zone).toInstant();
+                
+                sub.where(
+                    cb.and(
+                        cb.or(
+                            cb.equal(subRoot.get("type"), ContactType.MOBILE),
+                            cb.equal(subRoot.get("type"), ContactType.ASSUMED_MOBILE),
+                            cb.equal(subRoot.get("type"), ContactType.WHATSAPP)
+                        ),
+                        cb.greaterThanOrEqualTo(subRoot.get("updatedAt"), startOfToday)
+                    )
+                );
+                predicates.add(root.get("id").in(sub));
+            }
+
             if (criteria.getPriority() != null) {
                 try {
                     LeadPriority p = LeadPriority.valueOf(criteria.getPriority().toUpperCase());

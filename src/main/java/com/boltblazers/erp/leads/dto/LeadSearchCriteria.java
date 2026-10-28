@@ -19,6 +19,7 @@ public class LeadSearchCriteria {
     private Integer notContactedDays;
     private Boolean hasNoFollowup;
     private Boolean hasMobileNo;
+    private Boolean mobileUpdatedToday;
 
     public void setSearch(String search) {
         this.q = search;
