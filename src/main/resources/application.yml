@@ -8,8 +8,14 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     hikari:
-      maximum-pool-size: 2
+      maximum-pool-size: 5
       minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      keepalive-time: 120000
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
   jpa:
     hibernate:
       ddl-auto: validate
@@ -28,6 +34,7 @@ server:
   port: ${PORT:8080}
 
 app:
+  self-url: ${APP_SELF_URL:https://bb-erp-be.onrender.com}
   security:
     jwt:
       secret: ${JWT_SECRET:dummy_secret_for_local_development_only}
